@@ -32,9 +32,8 @@
     "@types/node": "^22.8.5",
     "@types/ws": "^8.5.13",
     "dotenv-cli": "^7.4.2",
-    "nodemon": "^3.1.7",
     "prettier": "^3.9.6",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.23.13",
     "turbo": "^2.10.12",
     "typescript": "^5.9.3"
   }

@@ -11,7 +11,14 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "env": ["ADMIN_SERVER_URL", "ADMIN_SERVER_PORT", "ADMIN_PASSWORD"]
+      "env": [
+        "TUNNEL_SERVER_HOST",
+        "TUNNEL_SERVER_PORT",
+        "PROXY_SERVER_PORT",
+        "ADMIN_SERVER_URL",
+        "ADMIN_SERVER_PORT",
+        "ADMIN_PASSWORD"
+      ]
     }
   }
 }

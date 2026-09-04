@@ -21,18 +21,11 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "nodemon",
+    "dev": "tsx watch --clear-screen=false src/main.ts 127.0.0.1 4948 OxFhMdko9XkAJM37l8RC2",
     "build": "tsc"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "src"
-    ],
-    "ext": "ts",
-    "exec": "ts-node src/main.ts 127.0.0.1 4948 OxFhMdko9XkAJM37l8RC2"
   },
   "dependencies": {
     "cac": "^6.7.14",
-    "@ying-tunnel/lib": "workspace:^"
+    "@ying-tunnel/lib": "workspace:*"
   }
 }

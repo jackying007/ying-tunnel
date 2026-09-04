@@ -1,17 +1,7 @@
 {
   "name": "test-server",
-  "private": true,
-  "version": "0.0.0",
-  "description": "",
   "scripts": {
-    "dev": "nodemon"
-  },
-  "nodemonConfig": {
-    "watch": [
-      "src"
-    ],
-    "ext": "ts",
-    "exec": "ts-node src/main.ts"
+    "dev": "tsx watch --clear-screen=false src/main.ts"
   },
   "dependencies": {
     "fastify": "^4.28.1",

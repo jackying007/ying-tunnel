@@ -1,13 +1,10 @@
 {
   "name": "test-lib",
-  "private": true,
-  "version": "0.0.2",
-  "description": "",
   "scripts": {
-    "test:proxy": "ts-node src/test-proxy.ts",
-    "test:tunnel": "ts-node src/test-tunnel.ts"
+    "test:proxy": "tsx watch --clear-screen=false src/test-proxy.ts",
+    "test:tunnel": "tsx watch --clear-screen=false src/test-tunnel.ts"
   },
   "dependencies": {
-    "@ying-tunnel/lib": "workspace:^"
+    "@ying-tunnel/lib": "workspace:*"
   }
 }

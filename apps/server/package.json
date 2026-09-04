@@ -8,18 +8,11 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "tsx watch --clear-screen=false src/main.ts",
     "build": "tsc"
   },
-  "nodemonConfig": {
-    "watch": [
-      "src"
-    ],
-    "ext": "ts",
-    "exec": "ts-node src/main.ts"
-  },
   "dependencies": {
-    "@ying-tunnel/lib": "workspace:^",
+    "@ying-tunnel/lib": "workspace:*",
     "nanoid": "^3.3.7",
     "fastify": "^4.28.1",
     "@fastify/static": "^7.0.4",
