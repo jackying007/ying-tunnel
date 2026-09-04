@@ -6,6 +6,10 @@
 npm i @ying-tunnel/cli -g
 ```
 
+```bash
+pnpm i @ying-tunnel/cli -g
+```
+
 ### 使用示例
 
 ```bash

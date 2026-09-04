@@ -7,79 +7,84 @@ export enum TunnelPackageType {
   TCPRequestStream, // 表示服务端向客户端传输数据块 消息头：{ type: 3, sign: "" } 消息体：数据块
   TCPRequestClose, // 表示服务端向客户端本地提示连接关闭 消息头：{ type: 4, sign: "" } 消息体：空
   TCPResponseStream, // 表示客户端向服务端传输数据块 消息头：{ type: 5, sign: "" } 消息体：数据块
-  TCPResponseClose, // 表示客户端向服务端提示连接关闭 消息头：{ type: 6, sign: "" } 消息体：空
+  TCPResponseClose // 表示客户端向服务端提示连接关闭 消息头：{ type: 6, sign: "" } 消息体：空
 }
 
 type TunnelPackageHeader =
   | {
-      type: TunnelPackageType.ConfirmConnection;
-      token: string;
+      type: TunnelPackageType.ConfirmConnection
+      token: string
     }
   | {
-      type: TunnelPackageType.TCPRequestStart;
-      sign: string;
-      localHost: string;
+      type: TunnelPackageType.TCPRequestStart
+      sign: string
+      localHost: string
     }
   | {
-      type: TunnelPackageType.TCPRequestClose;
-      sign: string;
+      type: TunnelPackageType.TCPRequestClose
+      sign: string
     }
   | {
-      type: TunnelPackageType.TCPRequestStream;
-      sign: string;
+      type: TunnelPackageType.TCPRequestStream
+      sign: string
     }
   | {
-      type: TunnelPackageType.TCPResponseStream;
-      sign: string;
+      type: TunnelPackageType.TCPResponseStream
+      sign: string
     }
   | {
-      type: TunnelPackageType.TCPResponseClose;
-      sign: string;
-    };
+      type: TunnelPackageType.TCPResponseClose
+      sign: string
+    }
 
 // 2 两个字节使用 writeUInt16BE 最多写入数字 65535
-const HeaderLengthBufferSize = 2;
-const BodyLengthBufferSize = 2;
-const markerLength = HeaderLengthBufferSize + BodyLengthBufferSize;
+const HeaderLengthBufferSize = 2
+const BodyLengthBufferSize = 2
+const markerLength = HeaderLengthBufferSize + BodyLengthBufferSize
 
 export type UnpackData = {
-  fullLength: number;
-  headerLength: number;
-  header: TunnelPackageHeader;
-  bodyLength: number;
-  bodyBuffer: Buffer;
-  completed: boolean;
-};
+  fullLength: number
+  headerLength: number
+  header: TunnelPackageHeader
+  bodyLength: number
+  bodyBuffer: Buffer
+  completed: boolean
+}
 
 export class TunnelPackage {
   // 此时传进来的 body 最大长度是 65536，所以存储时整体减 1
   static pack(header: TunnelPackageHeader, bodyBuffer?: Buffer) {
-    const headerBuffer = Buffer.from(JSON.stringify(header));
+    const headerBuffer = Buffer.from(JSON.stringify(header))
 
-    const markerBuffer = Buffer.alloc(markerLength);
-    markerBuffer.writeUInt16BE(headerBuffer.length);
+    const markerBuffer = Buffer.alloc(markerLength)
+    markerBuffer.writeUInt16BE(headerBuffer.length)
     markerBuffer.writeUInt16BE(
       bodyBuffer?.length ? bodyBuffer.byteLength - 1 : 0,
       HeaderLengthBufferSize
-    );
+    )
 
     return Buffer.concat(
-      bodyBuffer ? [markerBuffer, headerBuffer, bodyBuffer] : [markerBuffer, headerBuffer]
-    );
+      bodyBuffer
+        ? [markerBuffer, headerBuffer, bodyBuffer]
+        : [markerBuffer, headerBuffer]
+    )
   }
 
   static unpack(buffer: Buffer): undefined | UnpackData {
-    if (buffer.length < markerLength) return;
+    if (buffer.length < markerLength) return
 
-    const markerBuffer = buffer.subarray(0, markerLength);
-    const dataBuffer = buffer.subarray(markerLength);
+    const markerBuffer = buffer.subarray(0, markerLength)
+    const dataBuffer = buffer.subarray(markerLength)
 
-    const headerLength = markerBuffer.readUInt16BE();
-    const recordBodyLength = markerBuffer.readUInt16BE(HeaderLengthBufferSize);
-    const bodyLength = recordBodyLength ? recordBodyLength + 1 : 0;
+    const headerLength = markerBuffer.readUInt16BE()
+    const recordBodyLength = markerBuffer.readUInt16BE(HeaderLengthBufferSize)
+    const bodyLength = recordBodyLength ? recordBodyLength + 1 : 0
 
-    const headerBuffer = dataBuffer.subarray(0, headerLength);
-    const bodyBuffer = dataBuffer.subarray(headerLength, headerLength + bodyLength);
+    const headerBuffer = dataBuffer.subarray(0, headerLength)
+    const bodyBuffer = dataBuffer.subarray(
+      headerLength,
+      headerLength + bodyLength
+    )
 
     return {
       fullLength: markerLength + headerLength + bodyLength,
@@ -87,7 +92,7 @@ export class TunnelPackage {
       header: JSON.parse(headerBuffer.toString()),
       bodyLength,
       bodyBuffer,
-      completed: bodyLength === bodyBuffer.length,
-    };
+      completed: bodyLength === bodyBuffer.length
+    }
   }
 }

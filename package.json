@@ -1,37 +1,41 @@
 {
   "name": "ying-tunnel",
-  "private": true,
   "description": "nodejs 内网穿透工具套装",
   "keywords": [
     "内网穿透",
     "tunnel",
     "typescript",
     "nodejs",
-    "pnpm"
+    "pnpm",
+    "turbo"
   ],
   "author": {
-    "name": "JackDeng666",
-    "email": "1556393081@qq.com",
-    "url": "https://jackdeng666.github.io/"
+    "name": "jackying007",
+    "email": "yingjack007@gmail.com",
+    "url": "https://jackying007.github.io/"
   },
   "license": "MIT",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
-    "dev:apps": "dotenv -- pnpm --reporter append-only --filter ./apps/* dev",
-    "build:apps": "pnpm --reporter append-only --filter ./apps/* build",
-    "dev:lib": "pnpm --filter ./packages/lib dev",
-    "dev:cli": "pnpm --filter ./packages/cli dev",
-    "build:packages": "pnpm --reporter append-only --filter ./packages/* build"
+    "dev:apps": "dotenv -- turbo run dev --filter=./apps/*",
+    "build:apps": "turbo run build --filter=./apps/*",
+    "dev:lib": "turbo run dev --filter=lib",
+    "dev:cli": "turbo run dev --filter=cli",
+    "build:pkgs": "turbo run build --filter=./packages/*",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
+  "packageManager": "pnpm@10.33.4",
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
     "@types/node": "^22.8.5",
     "@types/ws": "^8.5.13",
     "dotenv-cli": "^7.4.2",
     "nodemon": "^3.1.7",
+    "prettier": "^3.9.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "turbo": "^2.10.12",
+    "typescript": "^5.9.3"
   }
 }

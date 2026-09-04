@@ -1,1 +1,5 @@
-{ "OxFhMdko9XkAJM37l8RC2": [{ "serverHost": "127.0.0.1:3435", "localHost": "127.0.0.1:6263" }] }
+{
+  "OxFhMdko9XkAJM37l8RC2": [
+    { "serverHost": "localhost:3435", "localHost": "127.0.0.1:6263" }
+  ]
+}

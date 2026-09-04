@@ -9,9 +9,9 @@
     "nodejs"
   ],
   "author": {
-    "name": "JackDeng666",
-    "email": "1556393081@qq.com",
-    "url": "https://jackdeng666.github.io/"
+    "name": "jackying007",
+    "email": "yingjack007@gmail.com",
+    "url": "https://jackying007.github.io/"
   },
   "license": "MIT",
   "main": "./dist/index.js",
@@ -19,10 +19,8 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "tsc -b -w tsconfig.json --preserveWatchOutput",
-    "build": "rm -rf dist && tsc -b tsconfig.json",
-    "test:proxy": "ts-node test/test-proxy.ts",
-    "test:tunnel": "ts-node test/test-tunnel.ts"
+    "dev": "tsc -b -w --preserveWatchOutput",
+    "build": "tsc"
   },
   "dependencies": {
     "nanoid": "^3.3.7"

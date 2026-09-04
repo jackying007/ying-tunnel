@@ -9,16 +9,16 @@
 在服务器中安装 `ying-tunnel-server` 的 docker-compose 示例。
 
 ```yml
-version: "3"
+version: '3'
 
 services:
-  yxc-auth:
-    image: jackdeng666/ying-tunnel-server
+  ying-tunnel-server:
+    image: jackying007/ying-tunnel-server
     container_name: ying-tunnel-server
     ports:
-      - "5859:5859"
-      - "4948:4948"
-      - "3435:3435"
+      - '5859:5859'
+      - '4948:4948'
+      - '3435:3435'
     environment:
       - TUNNEL_SERVER_HOST=服务器ip或域名
       - TUNNEL_SERVER_PORT=4948
@@ -33,11 +33,6 @@ services:
 pnpm i @ying-tunnel/cli -g
 ying-tunnel <要连接的服务ip或域名> <要连接的服务端口> <对应的token>
 ```
-
-### 作者开发环境版本
-
-- node v18.18.2
-- pnpm v8.15.6
 
 ### 架构图
 
