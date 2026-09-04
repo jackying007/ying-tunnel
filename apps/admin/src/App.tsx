@@ -244,19 +244,27 @@ function App() {
       {hasLogin ? (
         <Spin size="large" spinning={loading}>
           <div className="mb-8 text-center">
-            <Typography.Title level={4}>一、全局安装</Typography.Title>
+            <Typography.Title level={3}>一、全局安装</Typography.Title>
             <Typography.Text
-              className="text-xl"
+              className="text-lg!"
               code
               copyable={{ tooltips: false }}
             >
-              {`npm i @ying-tunnel/cli -g `}
+              npm i @ying-tunnel/cli -g
             </Typography.Text>
-            <Typography.Title level={4} className="!mt-2">
+            <br />
+            <Typography.Text
+              className="text-lg!"
+              code
+              copyable={{ tooltips: false }}
+            >
+              pnpm i @ying-tunnel/cli -g
+            </Typography.Text>
+            <Typography.Title level={3} className="mt-2!">
               二、连接操作
             </Typography.Title>
             <Typography.Text
-              className="text-xl"
+              className="text-lg!"
               code
               copyable={{ tooltips: false }}
             >

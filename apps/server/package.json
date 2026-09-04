@@ -1,12 +1,6 @@
 {
   "name": "@ying-tunnel/server",
-  "private": true,
   "version": "1.0.2",
-  "description": "",
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "main": "index.js",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/main.ts",
     "build": "tsc"
