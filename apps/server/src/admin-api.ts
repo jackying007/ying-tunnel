@@ -1,10 +1,11 @@
 import path from 'node:path'
+import { styleText } from 'node:util'
 import fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
 import { nanoid } from 'nanoid'
 import { TunnelConfig, ProxyMap } from '@ying-tunnel/lib'
 
-const AdminServerPort = Number(process.env.ADMIN_SERVER_PORT || 5859)
+const AdminServerPort = Number(process.env.ADMIN_API_PORT || 5859)
 const AdminPassword = process.env.ADMIN_PASSWORD
 
 const adminSessionMap = new Map<string, Date>()
@@ -127,10 +128,10 @@ export function adminApiBoostrap(
   app.post<{
     Body: ProxyMap[]
     Params: {
-      token: string
+      key: string
     }
   }>(
-    '/api/tunnel/:token',
+    '/api/tunnel/:key',
     {
       schema: {
         body: {
@@ -148,7 +149,7 @@ export function adminApiBoostrap(
       }
     },
     function (request, reply) {
-      tunnelConfig.set(request.params.token, request.body)
+      tunnelConfig.set(request.params.key, request.body)
 
       return {
         message: '操作成功'
@@ -159,18 +160,22 @@ export function adminApiBoostrap(
   // 删除
   app.delete<{
     Params: {
-      token: string
+      key: string
     }
-  }>('/api/tunnel/:token', function (request, reply) {
-    tunnelConfig.del(request.params.token)
+  }>('/api/tunnel/:key', function (request, reply) {
+    tunnelConfig.del(request.params.key)
 
     return {
       message: '删除成功'
     }
   })
 
-  app.listen({ host: '0.0.0.0', port: AdminServerPort }, err => {
+  app.listen({ port: AdminServerPort }, err => {
     if (err) throw err
-    console.log('AdminServer 已启动在:', `http://127.0.0.1:${AdminServerPort}`)
+    console.log(
+      styleText('green', 'AdminServerAPI'),
+      styleText('yellow', 'has started at'),
+      styleText('cyanBright', `http://localhost:${AdminServerPort}`)
+    )
   })
 }

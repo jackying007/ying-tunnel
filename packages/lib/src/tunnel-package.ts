@@ -2,7 +2,7 @@
 // localHost 要连接的本地服务路径，如 127.0.0.1:6263
 
 export enum TunnelPackageType {
-  ConfirmConnection = 1, // 表示客户端要确认连接上转发服务 消息头：{ type: 1, token: "" } 消息体：空
+  ConfirmConnection = 1, // 表示客户端要确认连接上转发服务 消息头：{ type: 1, key: "" } 消息体：空
   TCPRequestStart, // 表示服务端要求客户端发起本地请求 消息头：{ type: 2, sign: "", localHost: "" } 消息体：空
   TCPRequestStream, // 表示服务端向客户端传输数据块 消息头：{ type: 3, sign: "" } 消息体：数据块
   TCPRequestClose, // 表示服务端向客户端本地提示连接关闭 消息头：{ type: 4, sign: "" } 消息体：空
@@ -13,7 +13,7 @@ export enum TunnelPackageType {
 type TunnelPackageHeader =
   | {
       type: TunnelPackageType.ConfirmConnection
-      token: string
+      key: string
     }
   | {
       type: TunnelPackageType.TCPRequestStart

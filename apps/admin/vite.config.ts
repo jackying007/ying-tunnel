@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: process.env.ADMIN_SERVER_URL
+        target: `http://localhost:${process.env.ADMIN_API_PORT}`
       }
     }
   }

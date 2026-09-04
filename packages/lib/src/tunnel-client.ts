@@ -1,11 +1,12 @@
 import net from 'node:net'
 import { EventEmitter } from 'node:events'
+import { styleText } from 'node:util'
 import { TunnelPackage, TunnelPackageType, UnpackData } from './tunnel-package'
 
 type TunnelClientOptions = {
   host: string
   port: number
-  token: string
+  key: string
 }
 
 type PackData = ReturnType<typeof TunnelPackage.pack>
@@ -15,16 +16,16 @@ export class TunnelClient extends EventEmitter<{
 }> {
   host: string
   port: number
-  token: string
+  key: string
 
   private _socket?: net.Socket
   private _overageBuffer?: Buffer // 保存上一次没处理完的 buffer
 
-  constructor({ host, port, token }: TunnelClientOptions) {
+  constructor({ host, port, key }: TunnelClientOptions) {
     super()
     this.host = host
     this.port = port
-    this.token = token
+    this.key = key
     this.setup()
   }
 
@@ -33,17 +34,14 @@ export class TunnelClient extends EventEmitter<{
 
     this._socket.on('connect', () => {
       if (!this._socket) return
-      console.debug(
-        'TunnelClient ',
-        '连接上了流量转发服务了：\n',
-        `本地：${this._socket.localAddress}:${this._socket.localPort}\n`,
-        `远程：${this._socket.remoteAddress}:${this._socket.remotePort}`
+      console.log(
+        styleText('green', 'TunnelClient'),
+        'Successfully connected to the server.'
       )
-
       this._socket.write(
         TunnelPackage.pack({
           type: TunnelPackageType.ConfirmConnection,
-          token: this.token
+          key: this.key
         })
       )
     })
@@ -66,7 +64,10 @@ export class TunnelClient extends EventEmitter<{
     })
 
     this._socket.on('close', () => {
-      console.log('TunnelClient 连接断开了')
+      console.log(
+        styleText('green', 'TunnelClient'),
+        'server connection has been disconnected.'
+      )
     })
 
     this._socket.on('error', err => {
@@ -75,7 +76,7 @@ export class TunnelClient extends EventEmitter<{
   }
 
   handleMessage(unpackData: UnpackData) {
-    // console.debug("TunnelClient 收到隧道消息:", unpackData.header);
+    // console.debug('TunnelClient 收到隧道消息:', unpackData.header)
     this.emit('message', unpackData)
   }
 

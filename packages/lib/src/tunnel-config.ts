@@ -48,7 +48,7 @@ export class TunnelConfig {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       arr.push({
-        token: key,
+        key: key,
         proxyList: this._tunnelConfigs[key]
       })
     }

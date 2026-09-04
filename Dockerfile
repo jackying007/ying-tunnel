@@ -31,7 +31,7 @@ RUN pnpm deploy --filter=server --prod /prod/server
 
 FROM base AS server-runner
 
-EXPOSE $ADMIN_SERVER_PORT
+EXPOSE $ADMIN_API_PORT
 EXPOSE $TUNNEL_SERVER_PORT
 EXPOSE $PROXY_SERVER_PORT
 

@@ -14,9 +14,9 @@
       "env": [
         "TUNNEL_SERVER_HOST",
         "TUNNEL_SERVER_PORT",
+        "PROXY_SERVER_HOST",
         "PROXY_SERVER_PORT",
-        "ADMIN_SERVER_URL",
-        "ADMIN_SERVER_PORT",
+        "ADMIN_API_PORT",
         "ADMIN_PASSWORD"
       ]
     }

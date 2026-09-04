@@ -17,7 +17,7 @@ import type { ProxyMap } from '@ying-tunnel/lib'
 import { useDialogOpen } from './use-dialog-open'
 
 type Tunnel = {
-  token: string
+  key: string
   proxyList: ProxyMap[]
 }
 
@@ -86,7 +86,7 @@ function EditModal({ open, onClose, formValue, onSuccess }: EditModalProps) {
   const saveTunnelProxyList = async () => {
     try {
       setLoading(true)
-      await api(`/api/tunnel${formValue?.token ? `/${formValue.token}` : ''}`, {
+      await api(`/api/tunnel${formValue?.key ? `/${formValue.key}` : ''}`, {
         method: 'POST',
         body: JSON.stringify(data)
       })
@@ -165,8 +165,8 @@ function App() {
     }
   }
 
-  const deleteTunnel = async (token: string) => {
-    await api(`/api/tunnel/${token}`, {
+  const deleteTunnel = async (key: string) => {
+    await api(`/api/tunnel/${key}`, {
       method: 'DELETE'
     })
 
@@ -183,9 +183,9 @@ function App() {
 
   const columns: ColumnsType<Tunnel> = [
     {
-      title: 'token',
+      title: 'key',
       ellipsis: true,
-      dataIndex: 'token',
+      dataIndex: 'key',
       width: 280,
       render: (_, record) => {
         return (
@@ -194,10 +194,10 @@ function App() {
             code
             copyable={{
               tooltips: '一键复制连接信息',
-              text: `ying-tunnel ${tunnelInfo?.tunnelServerHost} ${tunnelInfo?.tunnelServerPort} ${record.token}`
+              text: `ying-tunnel ${tunnelInfo?.tunnelServerHost} ${tunnelInfo?.tunnelServerPort} ${record.key}`
             }}
           >
-            {record.token}
+            {record.key}
           </Typography.Text>
         )
       }
@@ -225,11 +225,11 @@ function App() {
               编辑
             </Typography.Link>
             <Popconfirm
-              title={`确定删除[${record.token}]？`}
+              title={`确定删除[${record.key}]？`}
               okText="确定"
               cancelText="取消"
               placement="left"
-              onConfirm={() => deleteTunnel(record.token)}
+              onConfirm={() => deleteTunnel(record.key)}
             >
               <Typography.Link>删除</Typography.Link>
             </Popconfirm>
@@ -269,7 +269,7 @@ function App() {
               copyable={{ tooltips: false }}
             >
               {tunnelInfo &&
-                `ying-tunnel ${tunnelInfo?.tunnelServerHost} ${tunnelInfo?.tunnelServerPort} <token> `}
+                `ying-tunnel ${tunnelInfo?.tunnelServerHost} ${tunnelInfo?.tunnelServerPort} <key> `}
             </Typography.Text>
           </div>
           <div className="mb-4 flex justify-end">
@@ -278,7 +278,7 @@ function App() {
             </Button>
           </div>
           <Table
-            rowKey="token"
+            rowKey="key"
             columns={columns}
             dataSource={tunnelInfo?.tunnelList}
             pagination={false}

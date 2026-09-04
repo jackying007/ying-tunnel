@@ -11,11 +11,11 @@ const port = 4948
 
 const tunnelConfig = new TunnelConfig(join(process.cwd(), 'tunnel-config.json'))
 
-const tunnelServer = new TunnelServer({ host: '127.0.0.1', port, tunnelConfig })
+const tunnelServer = new TunnelServer({ port, tunnelConfig })
 const tunnelClient = new TunnelClient({
   host: '127.0.0.1',
   port,
-  token: 'OxFhMdko9XkAJM37l8RC2'
+  key: 'OxFhMdko9XkAJM37l8RC2'
 })
 
 // 连续多发几个看看粘包情况

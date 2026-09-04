@@ -1,17 +1,17 @@
 import net from 'node:net'
 import { EventEmitter } from 'node:events'
+import { styleText } from 'node:util'
 import { nanoid } from 'nanoid'
 import { TunnelPackage, TunnelPackageType, UnpackData } from './tunnel-package'
 import { TunnelConfig } from './tunnel-config'
 
 type TunnelServerOptions = {
-  host: string
   port: number
   tunnelConfig: TunnelConfig
   closeTime?: number
 }
 
-type SocketPoolData = {
+type ConnectionPoolData = {
   socket: net.Socket
   overageBuffer?: Buffer // 保存上一次没处理完的 buffer
   destroyTimer?: NodeJS.Timeout // 主动断开连接的定时器
@@ -23,22 +23,15 @@ export class TunnelServer extends EventEmitter<{
   message: [UnpackData]
   socketClose: [net.Socket]
 }> {
-  host: string
   port: number
   tunnelConfig: TunnelConfig
   closeTime: number
 
-  private _connectionPool: Map<string, SocketPoolData>
+  private _connectionPool: Map<string, ConnectionPoolData>
   private _server?: net.Server
 
-  constructor({
-    host,
-    port,
-    tunnelConfig,
-    closeTime = 5000
-  }: TunnelServerOptions) {
+  constructor({ port, tunnelConfig, closeTime = 5000 }: TunnelServerOptions) {
     super()
-    this.host = host
     this.port = port
     this.tunnelConfig = tunnelConfig
     this.closeTime = closeTime
@@ -49,27 +42,27 @@ export class TunnelServer extends EventEmitter<{
   setup() {
     this._server = net.createServer(socket => {
       console.log(
-        'TunnelServer',
-        '有人连接流量转发服务了：\n',
-        `本地：${socket.localAddress}:${socket.localPort}\n`,
-        `远程：${socket.remoteAddress}:${socket.remotePort}`
+        styleText('green', 'TunnelServer'),
+        'a client has connected.'
+        // socket.remoteAddress,
+        // socket.remoteFamily,
+        // socket.remotePort
       )
-
-      const socketPoolData: SocketPoolData = {
+      const connectionPoolData: ConnectionPoolData = {
         socket
       }
-      const randomToken = nanoid()
-      this._connectionPool.set(randomToken, socketPoolData)
+      const randomKey = nanoid()
+      this._connectionPool.set(randomKey, connectionPoolData)
 
-      // 一定时间内需带上正确 token，否则断开连接。
-      socketPoolData.destroyTimer = setTimeout(
+      // 一定时间内要带上正确 key，否则断开连接。
+      connectionPoolData.destroyTimer = setTimeout(
         () => this.destroySocket(socket),
         this.closeTime
       )
 
       socket.on('data', chunk => {
-        if (socketPoolData.overageBuffer) {
-          chunk = Buffer.concat([socketPoolData.overageBuffer, chunk])
+        if (connectionPoolData.overageBuffer) {
+          chunk = Buffer.concat([connectionPoolData.overageBuffer, chunk])
         }
         let unpackData = TunnelPackage.unpack(chunk)
         while (unpackData && unpackData.completed) {
@@ -79,11 +72,14 @@ export class TunnelServer extends EventEmitter<{
           unpackData = TunnelPackage.unpack(chunk)
         }
         // 如果 unpackData 不完整，把剩下数据保存下次处理
-        socketPoolData.overageBuffer = chunk
+        connectionPoolData.overageBuffer = chunk
       })
 
       socket.on('close', () => {
-        console.log('TunnelServer 有客户端连接断开了')
+        console.log(
+          styleText('green', 'TunnelServer'),
+          'a client connection has been disconnected.'
+        )
         this.destroySocket(socket)
         this.emit('socketClose', socket)
       })
@@ -95,15 +91,19 @@ export class TunnelServer extends EventEmitter<{
     })
 
     this._server.listen(this.port, () => {
-      console.log('TunnelServer 已启动在:', `${this.host}:${this.port}`)
+      console.log(
+        styleText('green', 'TunnelServer'),
+        styleText('yellow', 'has started at port:'),
+        styleText('cyanBright', `${this.port}`)
+      )
     })
   }
 
   destroySocket(socket: net.Socket) {
     socket.destroy()
     this._connectionPool.forEach(
-      (socketPoolData: SocketPoolData, key: string) => {
-        if (socket === socketPoolData.socket) {
+      (connectionPoolData: ConnectionPoolData, key: string) => {
+        if (socket === connectionPoolData.socket) {
           this._connectionPool.delete(key)
         }
       }
@@ -112,22 +112,20 @@ export class TunnelServer extends EventEmitter<{
 
   handleMessage(unpackData: UnpackData, socket: net.Socket) {
     // console.debug("TunnelServer 收到隧道消息:", unpackData.header);
-
     if (unpackData.header.type === TunnelPackageType.ConfirmConnection) {
-      const token = unpackData.header.token
-      if (this._connectionPool.get(token)) return this.destroySocket(socket)
+      const key = unpackData.header.key
+      if (this._connectionPool.get(key)) return this.destroySocket(socket)
 
-      const tunnels = this.tunnelConfig.get(token)
+      const tunnels = this.tunnelConfig.get(key)
       if (tunnels) {
         // 找出当前的socket，并替代掉最初的随机key
-        this._connectionPool.forEach((socketPoolData, key) => {
-          if (socket === socketPoolData.socket) {
-            this._connectionPool.delete(key)
-            clearTimeout(socketPoolData?.destroyTimer)
-
+        this._connectionPool.forEach((connectionPoolData, initialKey) => {
+          if (socket === connectionPoolData.socket) {
+            this._connectionPool.delete(initialKey)
+            clearTimeout(connectionPoolData?.destroyTimer)
             // 立即设置的话 forEach 会立马再触发，要延迟一下
             process.nextTick(() =>
-              this._connectionPool.set(token, socketPoolData)
+              this._connectionPool.set(key, connectionPoolData)
             )
           }
         })
@@ -137,11 +135,10 @@ export class TunnelServer extends EventEmitter<{
     }
   }
 
-  sendMessage(token: string, pack: PackData) {
-    const socketPoolData = this._connectionPool.get(token)
-    if (!socketPoolData) return
-
-    socketPoolData.socket.write(pack)
-    return socketPoolData.socket
+  sendMessage(key: string, pack: PackData) {
+    const socket = this._connectionPool.get(key)?.socket
+    if (!socket) return
+    socket.write(pack)
+    return socket
   }
 }

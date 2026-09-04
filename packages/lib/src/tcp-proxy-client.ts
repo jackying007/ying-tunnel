@@ -1,28 +1,28 @@
 import net from 'node:net'
 import { EventEmitter } from 'node:events'
 
-export class ProxyClient extends EventEmitter<{
+export class TCPProxyClient extends EventEmitter<{
   data: [string, Buffer]
   close: [string]
 }> {
-  private _reqConnectionPool: Map<string, net.Socket>
+  private _tcpConnectionPool: Map<string, net.Socket>
 
   constructor() {
     super()
-    this._reqConnectionPool = new Map()
+    this._tcpConnectionPool = new Map()
   }
 
   start(host: string, port: number, sign: string) {
     const socket = net.createConnection({ host, port })
 
-    this._reqConnectionPool.set(sign, socket)
+    this._tcpConnectionPool.set(sign, socket)
 
     socket.on('data', chunk => {
       this.emit('data', sign, chunk)
     })
 
     socket.on('close', () => {
-      this._reqConnectionPool.delete(sign)
+      this._tcpConnectionPool.delete(sign)
       this.emit('close', sign)
     })
 
@@ -32,14 +32,14 @@ export class ProxyClient extends EventEmitter<{
   }
 
   stream(sign: string, buffer: Uint8Array | string) {
-    const socket = this._reqConnectionPool.get(sign)
+    const socket = this._tcpConnectionPool.get(sign)
     if (!socket) return
 
     socket.write(buffer)
   }
 
   destroy(sign: string) {
-    const socket = this._reqConnectionPool.get(sign)
+    const socket = this._tcpConnectionPool.get(sign)
     if (!socket) return
 
     socket.destroy()

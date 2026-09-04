@@ -5,33 +5,34 @@ import {
   TunnelServer,
   TunnelPackageType,
   TunnelPackage,
-  ProxyServer
+  HTTPProxyServer
 } from '@ying-tunnel/lib'
 import { adminApiBoostrap } from './admin-api'
 
 const tunnelConfig = new TunnelConfig(join(process.cwd(), 'tunnel-config.json'))
 
-const tunnelServerHost = process.env.TUNNEL_SERVER_HOST || ''
-const tunnelServerPort = Number(process.env.TUNNEL_SERVER_PORT || 4948)
+const tunnelServerHost = process.env.TUNNEL_SERVER_HOST ?? '127.0.0.1'
+const tunnelServerPort = Number(process.env.TUNNEL_SERVER_PORT ?? 4948)
 const tunnelServer = new TunnelServer({
-  host: tunnelServerHost,
   port: tunnelServerPort,
   tunnelConfig
 })
 
-const proxyServerPort = Number(process.env.PROXY_SERVER_PORT || 3435)
-const proxyServer = new ProxyServer({ port: proxyServerPort, tunnelConfig })
+const httpProxyServer = new HTTPProxyServer({
+  port: Number(process.env.PROXY_SERVER_PORT ?? 80),
+  tunnelConfig
+})
 
 const tunnelSocketAndTcpSignsMap = new Map<net.Socket, string[]>()
 
-proxyServer.on('connect', (sign, connectInfo, socket) => {
-  if (connectInfo) {
+httpProxyServer.on('connect', (sign, proxyMapWithKey, socket) => {
+  if (proxyMapWithKey) {
     const tunnelSocket = tunnelServer.sendMessage(
-      connectInfo.key,
+      proxyMapWithKey.key,
       TunnelPackage.pack({
         type: TunnelPackageType.TCPRequestStart,
         sign,
-        localHost: connectInfo.localHost
+        localHost: proxyMapWithKey.localHost
       })
     )
     if (tunnelSocket) {
@@ -47,10 +48,10 @@ proxyServer.on('connect', (sign, connectInfo, socket) => {
   }
 })
 
-proxyServer.on('data', (sign, connectInfo, chunk) => {
-  if (connectInfo) {
+httpProxyServer.on('data', (sign, proxyMapWithKey, chunk) => {
+  if (proxyMapWithKey) {
     tunnelServer.sendMessage(
-      connectInfo.key,
+      proxyMapWithKey.key,
       TunnelPackage.pack(
         {
           type: TunnelPackageType.TCPRequestStream,
@@ -62,10 +63,10 @@ proxyServer.on('data', (sign, connectInfo, chunk) => {
   }
 })
 
-proxyServer.on('close', (sign, connectInfo) => {
-  if (connectInfo) {
+httpProxyServer.on('close', (sign, proxyMapWithKey) => {
+  if (proxyMapWithKey) {
     tunnelServer.sendMessage(
-      connectInfo.key,
+      proxyMapWithKey.key,
       TunnelPackage.pack({
         type: TunnelPackageType.TCPRequestClose,
         sign
@@ -77,10 +78,10 @@ proxyServer.on('close', (sign, connectInfo) => {
 tunnelServer.on('message', unpackData => {
   switch (unpackData.header.type) {
     case TunnelPackageType.TCPResponseStream:
-      proxyServer.stream(unpackData.header.sign, unpackData.bodyBuffer)
+      httpProxyServer.stream(unpackData.header.sign, unpackData.bodyBuffer)
       break
     case TunnelPackageType.TCPResponseClose:
-      proxyServer.destroy(unpackData.header.sign)
+      httpProxyServer.destroy(unpackData.header.sign)
       break
   }
 })
@@ -89,7 +90,7 @@ tunnelServer.on('socketClose', tunnelSocket => {
   const signs = tunnelSocketAndTcpSignsMap.get(tunnelSocket)
   if (signs) {
     signs.forEach(sign => {
-      proxyServer.destroy(sign)
+      httpProxyServer.destroy(sign)
     })
   }
 })
