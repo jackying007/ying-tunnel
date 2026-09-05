@@ -12,7 +12,7 @@ export class TCPProxyClient extends EventEmitter<{
     this._tcpConnectionPool = new Map()
   }
 
-  start(host: string, port: number, sign: string) {
+  createConnection(host: string, port: number, sign: string) {
     const socket = net.createConnection({ host, port })
 
     this._tcpConnectionPool.set(sign, socket)
@@ -31,7 +31,7 @@ export class TCPProxyClient extends EventEmitter<{
     })
   }
 
-  stream(sign: string, buffer: Uint8Array | string) {
+  write(sign: string, buffer: Uint8Array | string) {
     const socket = this._tcpConnectionPool.get(sign)
     if (!socket) return
 

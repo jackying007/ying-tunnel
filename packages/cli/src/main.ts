@@ -1,53 +1,21 @@
-import cac from 'cac'
-import {
-  TunnelClient,
-  TunnelPackage,
-  TunnelPackageType,
-  TCPProxyClient
-} from '@ying-tunnel/lib'
+#!/usr/bin/env node
+import { program } from 'commander'
+import { connectTunnel } from './connect-tunnel'
+import { getPackageJson } from './get-package-json'
 
-const cli = cac()
-cli.command('<host> <port> <key>', 'link to tcp socket.').action(init)
-cli.help()
-cli.parse()
+const pkg = getPackageJson()
 
-function init(host: string, port: string, key: string) {
-  const tunnelClient = new TunnelClient({ host, port: Number(port), key })
-  const tcpProxyClient = new TCPProxyClient()
+program
+  .name('ying-tunnel')
+  .version(`${pkg.version}`, '-v --version')
+  .description('CLI program for connecting to tunnel server.')
+  .helpOption(true)
 
-  tunnelClient.on('message', unpackData => {
-    switch (unpackData.header.type) {
-      case TunnelPackageType.TCPRequestStart:
-        const host = unpackData.header.localHost.split(':')
-        tcpProxyClient.start(host[0], Number(host[1]), unpackData.header.sign)
-        break
-      case TunnelPackageType.TCPRequestStream:
-        tcpProxyClient.stream(unpackData.header.sign, unpackData.bodyBuffer)
-        break
-      case TunnelPackageType.TCPRequestClose:
-        tcpProxyClient.destroy(unpackData.header.sign)
-        break
-    }
-  })
+program
+  .command('connect', { isDefault: true })
+  .argument('<host>', 'The server IP or domain name to connect to')
+  .argument('<port>', 'The server port to connect to')
+  .argument('<key>', 'corresponding key')
+  .action(connectTunnel)
 
-  tcpProxyClient.on('data', (sign, chunk) => {
-    tunnelClient.sendMessage(
-      TunnelPackage.pack(
-        {
-          type: TunnelPackageType.TCPResponseStream,
-          sign
-        },
-        chunk
-      )
-    )
-  })
-
-  tcpProxyClient.on('close', sign => {
-    tunnelClient.sendMessage(
-      TunnelPackage.pack({
-        type: TunnelPackageType.TCPResponseClose,
-        sign
-      })
-    )
-  })
-}
+program.parse(process.argv)

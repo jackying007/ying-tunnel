@@ -13,6 +13,10 @@ pnpm i @ying-tunnel/cli -g
 ### 使用示例
 
 ```bash
+ying-tunnel -v
+```
+
+```bash
 ying-tunnel <要连接的服务ip或域名> <要连接的服务端口> <对应的key>
 ```
 

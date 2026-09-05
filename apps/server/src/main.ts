@@ -27,6 +27,7 @@ const tunnelSocketAndTcpSignsMap = new Map<net.Socket, string[]>()
 
 httpProxyServer.on('connect', (sign, proxyMapWithKey, socket) => {
   if (proxyMapWithKey) {
+    // 给隧道的客户端标记上传递给它的 http 请求的标识，关闭时统一关闭
     const tunnelSocket = tunnelServer.sendMessage(
       proxyMapWithKey.key,
       TunnelPackage.pack({
@@ -78,7 +79,7 @@ httpProxyServer.on('close', (sign, proxyMapWithKey) => {
 tunnelServer.on('message', unpackData => {
   switch (unpackData.header.type) {
     case TunnelPackageType.TCPResponseStream:
-      httpProxyServer.stream(unpackData.header.sign, unpackData.bodyBuffer)
+      httpProxyServer.write(unpackData.header.sign, unpackData.bodyBuffer)
       break
     case TunnelPackageType.TCPResponseClose:
       httpProxyServer.destroy(unpackData.header.sign)

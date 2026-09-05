@@ -33,10 +33,10 @@ export class HTTPProxyServer extends EventEmitter<{
     this.tunnelConfig = tunnelConfig
     this._tcpConnectionPool = new Map()
 
-    this.start()
+    this.setup()
   }
 
-  start() {
+  setup() {
     const server = net.createServer(socket => {
       const sign = nanoid(10)
       const poolData: TCPConnectionPoolData = {
@@ -95,7 +95,7 @@ export class HTTPProxyServer extends EventEmitter<{
     })
   }
 
-  stream(sign: string, buffer: Uint8Array | string) {
+  write(sign: string, buffer: Uint8Array | string) {
     const socket = this._tcpConnectionPool.get(sign)?.socket
     if (!socket) return
 

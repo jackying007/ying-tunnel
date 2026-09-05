@@ -60,11 +60,11 @@ docker run --name ying-tunnel-server -d \
 ### 发布 packages
 
 ```bash
-pnpm build:packages
+pnpm build:pkgs
 ```
 
 ```bash
-pnpm changeset add
+pnpm changeset
 pnpm changeset version
 pnpm changeset publish
 ```
