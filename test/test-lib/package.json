@@ -1,5 +1,6 @@
 {
   "name": "test-lib",
+  "private": true,
   "scripts": {
     "test:proxy": "tsx watch --clear-screen=false src/test-proxy.ts",
     "test:tunnel": "tsx watch --clear-screen=false src/test-tunnel.ts"
