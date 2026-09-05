@@ -2,8 +2,7 @@ import path from 'node:path'
 import { styleText } from 'node:util'
 import fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
-import { nanoid } from 'nanoid'
-import { TunnelConfig, ProxyMap } from '@ying-tunnel/lib'
+import { randomKey, TunnelConfig, ProxyMap } from '@ying-tunnel/lib'
 
 const AdminServerPort = Number(process.env.ADMIN_API_PORT || 5859)
 const AdminPassword = process.env.ADMIN_PASSWORD
@@ -77,7 +76,7 @@ export function adminApiBoostrap(
       const { password } = request.body
 
       if (password === AdminPassword) {
-        const session = nanoid()
+        const session = randomKey()
         adminSessionMap.set(session, new Date())
         return { session }
       }
@@ -116,7 +115,7 @@ export function adminApiBoostrap(
       }
     },
     function (request, reply) {
-      tunnelConfig.set(nanoid(), request.body)
+      tunnelConfig.set(randomKey(), request.body)
 
       return {
         message: '操作成功'

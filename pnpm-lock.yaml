@@ -90,9 +90,6 @@ importers:
       fastify:
         specifier: ^4.28.1
         version: 4.29.1
-      nanoid:
-        specifier: ^3.3.7
-        version: 3.3.18
 
   packages/cli:
     dependencies:
@@ -103,11 +100,7 @@ importers:
         specifier: ^15.0.0
         version: 15.0.0
 
-  packages/lib:
-    dependencies:
-      nanoid:
-        specifier: ^3.3.7
-        version: 3.3.18
+  packages/lib: {}
 
   test/test-lib:
     dependencies:

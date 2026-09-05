@@ -1,7 +1,7 @@
 import net from 'node:net'
 import { EventEmitter } from 'node:events'
 import { styleText } from 'node:util'
-import { nanoid } from 'nanoid'
+import { randomKey } from './random-key'
 import { TunnelPackage, TunnelPackageType, UnpackData } from './tunnel-package'
 import { TunnelConfig } from './tunnel-config'
 
@@ -51,8 +51,8 @@ export class TunnelServer extends EventEmitter<{
       const connectionPoolData: ConnectionPoolData = {
         socket
       }
-      const randomKey = nanoid()
-      this._connectionPool.set(randomKey, connectionPoolData)
+      const initialKey = randomKey()
+      this._connectionPool.set(initialKey, connectionPoolData)
 
       // 一定时间内要带上正确 key，否则断开连接。
       connectionPoolData.destroyTimer = setTimeout(

@@ -1,7 +1,7 @@
 import net from 'node:net'
 import { EventEmitter } from 'node:events'
 import { styleText } from 'node:util'
-import { nanoid } from 'nanoid'
+import { randomKey } from './random-key'
 import { TunnelConfig } from './tunnel-config'
 
 type HTTPProxyServerOptions = {
@@ -38,7 +38,7 @@ export class HTTPProxyServer extends EventEmitter<{
 
   setup() {
     const server = net.createServer(socket => {
-      const sign = nanoid(10)
+      const sign = randomKey(10)
       const poolData: TCPConnectionPoolData = {
         socket,
         proxyMapWithKey: undefined
