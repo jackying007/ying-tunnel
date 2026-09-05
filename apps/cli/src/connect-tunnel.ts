@@ -3,7 +3,7 @@ import {
   TunnelPackage,
   TunnelPackageType,
   TCPProxyClient
-} from '@ying-tunnel/lib'
+} from '@ying-tunnel/core'
 
 export function connectTunnel(host: string, port: string, key: string) {
   const tunnelClient = new TunnelClient({ host, port: Number(port), key })

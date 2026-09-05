@@ -1,5 +1,18 @@
 # @ying-tunnel/server
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @ying-tunnel/core@1.0.1
+
+## 1.1.1
+
+### Patch Changes
+
+- rename lib to core
+
 ## 1.1.0
 
 ### Minor Changes

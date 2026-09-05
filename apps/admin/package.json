@@ -18,9 +18,9 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
-    "@ying-tunnel/lib": "workspace:*",
+    "@ying-tunnel/core": "workspace:*",
     "globals": "^15.11.0",
-    "oxc-transform-react": "^0.148.0",
+    "oxc-transform-react": "^0.145.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2"
   }

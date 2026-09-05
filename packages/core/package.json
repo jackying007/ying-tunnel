@@ -1,6 +1,6 @@
 {
-  "name": "@ying-tunnel/lib",
-  "version": "1.1.0",
+  "name": "@ying-tunnel/core",
+  "version": "1.0.1",
   "description": "ying-tunnel 内网穿透工具的核心库",
   "keywords": [
     "内网穿透",

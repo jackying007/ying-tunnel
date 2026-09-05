@@ -2,7 +2,7 @@ import path from 'node:path'
 import { styleText } from 'node:util'
 import fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
-import { randomKey, TunnelConfig, ProxyMap } from '@ying-tunnel/lib'
+import { randomKey, TunnelConfig, ProxyMap } from '@ying-tunnel/core'
 
 const AdminServerPort = Number(process.env.ADMIN_API_PORT || 5859)
 const AdminPassword = process.env.ADMIN_PASSWORD

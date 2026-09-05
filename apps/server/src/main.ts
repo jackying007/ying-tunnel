@@ -6,7 +6,7 @@ import {
   TunnelPackageType,
   TunnelPackage,
   HTTPProxyServer
-} from '@ying-tunnel/lib'
+} from '@ying-tunnel/core'
 import { adminApiBoostrap } from './admin-api'
 
 const tunnelConfig = new TunnelConfig(join(process.cwd(), 'tunnel-config.json'))

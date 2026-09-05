@@ -1,11 +1,11 @@
 {
-  "name": "test-lib",
+  "name": "test-core",
   "private": true,
   "scripts": {
     "test:proxy": "tsx watch --clear-screen=false src/test-proxy.ts",
     "test:tunnel": "tsx watch --clear-screen=false src/test-tunnel.ts"
   },
   "dependencies": {
-    "@ying-tunnel/lib": "workspace:*"
+    "@ying-tunnel/core": "workspace:*"
   }
 }
