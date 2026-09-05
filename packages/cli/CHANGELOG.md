@@ -6,12 +6,6 @@
 
 - remove cac and use commander
 
-## 2.0.0
-
-### Major Changes
-
-- remove cac use commander
-
 ## 1.0.1
 
 ### Patch Changes
