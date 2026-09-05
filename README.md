@@ -88,8 +88,8 @@ docker run --name ying-tunnel-server -d \
 ## 发布 packages
 
 ```bash
-pnpm build:apps
 pnpm build:pkgs
+pnpm build:apps
 ```
 
 ```bash

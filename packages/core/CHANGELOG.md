@@ -1,5 +1,11 @@
 # @ying-tunnel/core
 
+## 1.1.0
+
+### Minor Changes
+
+- add retry logic
+
 ## 1.0.1
 
 ### Patch Changes

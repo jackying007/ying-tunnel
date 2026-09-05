@@ -14,23 +14,23 @@ type PackData = ReturnType<typeof TunnelPackage.pack>
 export class TunnelClient extends EventEmitter<{
   message: [UnpackData]
 }> {
-  host: string
-  port: number
-  key: string
+  options: TunnelClientOptions
 
   private _socket?: net.Socket
   private _overageBuffer?: Buffer // 保存上一次没处理完的 buffer
+  private _retryCount = 0
 
-  constructor({ host, port, key }: TunnelClientOptions) {
+  constructor(options: TunnelClientOptions) {
     super()
-    this.host = host
-    this.port = port
-    this.key = key
+    this.options = options
     this.setup()
   }
 
   setup() {
-    this._socket = net.createConnection({ host: this.host, port: this.port })
+    this._socket = net.createConnection({
+      host: this.options.host,
+      port: this.options.port
+    })
 
     this._socket.on('connect', () => {
       if (!this._socket) return
@@ -41,7 +41,7 @@ export class TunnelClient extends EventEmitter<{
       this._socket.write(
         TunnelPackage.pack({
           type: TunnelPackageType.ConfirmConnection,
-          key: this.key
+          key: this.options.key
         })
       )
     })
@@ -72,11 +72,19 @@ export class TunnelClient extends EventEmitter<{
 
     this._socket.on('error', err => {
       console.error(err)
+      if (this._retryCount <= 3) {
+        this._retryCount += 1
+        console.log(
+          styleText('green', 'TunnelClient'),
+          styleText('red', 'Retry in 2 seconds ...')
+        )
+        setTimeout(() => this.setup(), 2000)
+      }
     })
   }
 
   handleMessage(unpackData: UnpackData) {
-    // console.debug('TunnelClient 收到隧道消息:', unpackData.header)
+    // console.debug('TunnelClient received message:', unpackData.header)
     this.emit('message', unpackData)
   }
 

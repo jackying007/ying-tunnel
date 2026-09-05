@@ -13,7 +13,7 @@ import {
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { JsonEditor } from 'json-edit-react'
-import type { ProxyMap } from '@ying-tunnel/lib'
+import type { ProxyMap } from '@ying-tunnel/core'
 import { useDialogOpen } from './use-dialog-open'
 
 type Tunnel = {

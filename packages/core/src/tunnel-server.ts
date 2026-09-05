@@ -111,7 +111,7 @@ export class TunnelServer extends EventEmitter<{
   }
 
   handleMessage(unpackData: UnpackData, socket: net.Socket) {
-    // console.debug("TunnelServer 收到隧道消息:", unpackData.header);
+    // console.debug("TunnelServer received message:", unpackData.header);
     if (unpackData.header.type === TunnelPackageType.ConfirmConnection) {
       const key = unpackData.header.key
       // 如果发现这个key已经有客户端连接，则断开当前连接

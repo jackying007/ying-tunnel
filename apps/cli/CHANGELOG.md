@@ -1,5 +1,12 @@
 # @ying-tunnel/cli
 
+## 1.1.4
+
+### Patch Changes
+
+- Updated dependencies
+  - @ying-tunnel/core@1.1.0
+
 ## 1.1.3
 
 ### Patch Changes

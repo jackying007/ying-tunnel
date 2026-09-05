@@ -1,5 +1,12 @@
 # @ying-tunnel/server
 
+## 1.1.3
+
+### Patch Changes
+
+- Updated dependencies
+  - @ying-tunnel/core@1.1.0
+
 ## 1.1.2
 
 ### Patch Changes
