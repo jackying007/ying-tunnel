@@ -1,5 +1,11 @@
 # @ying-tunnel/cli
 
+## 1.2.0
+
+### Minor Changes
+
+- add local http proxy function
+
 ## 1.1.5
 
 ### Patch Changes
