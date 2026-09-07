@@ -27,7 +27,7 @@ export class TunnelServer extends EventEmitter<{
   tunnelConfig: TunnelConfig
   closeTime: number
 
-  private _connectionPool: Map<string, ConnectionPoolData>
+  private _tcpConnectionPool: Map<string, ConnectionPoolData>
   private _server?: net.Server
 
   constructor({ port, tunnelConfig, closeTime = 5000 }: TunnelServerOptions) {
@@ -35,7 +35,7 @@ export class TunnelServer extends EventEmitter<{
     this.port = port
     this.tunnelConfig = tunnelConfig
     this.closeTime = closeTime
-    this._connectionPool = new Map()
+    this._tcpConnectionPool = new Map()
     this.setup()
   }
 
@@ -52,7 +52,7 @@ export class TunnelServer extends EventEmitter<{
         socket
       }
       const initialKey = randomKey()
-      this._connectionPool.set(initialKey, connectionPoolData)
+      this._tcpConnectionPool.set(initialKey, connectionPoolData)
 
       // 一定时间内要带上正确 key，否则断开连接。
       connectionPoolData.destroyTimer = setTimeout(
@@ -101,10 +101,10 @@ export class TunnelServer extends EventEmitter<{
 
   destroySocket(socket: net.Socket) {
     socket.destroy()
-    this._connectionPool.forEach(
+    this._tcpConnectionPool.forEach(
       (connectionPoolData: ConnectionPoolData, key: string) => {
         if (socket === connectionPoolData.socket) {
-          this._connectionPool.delete(key)
+          this._tcpConnectionPool.delete(key)
         }
       }
     )
@@ -115,18 +115,18 @@ export class TunnelServer extends EventEmitter<{
     if (unpackData.header.type === TunnelPackageType.ConfirmConnection) {
       const key = unpackData.header.key
       // 如果发现这个key已经有客户端连接，则断开当前连接
-      if (this._connectionPool.get(key)) return this.destroySocket(socket)
+      if (this._tcpConnectionPool.get(key)) return this.destroySocket(socket)
 
       const tunnels = this.tunnelConfig.get(key)
       if (tunnels) {
         // 找出当前的socket，并替代掉最初的随机key
-        this._connectionPool.forEach((connectionPoolData, initialKey) => {
+        this._tcpConnectionPool.forEach((connectionPoolData, initialKey) => {
           if (socket === connectionPoolData.socket) {
-            this._connectionPool.delete(initialKey)
+            this._tcpConnectionPool.delete(initialKey)
             clearTimeout(connectionPoolData?.destroyTimer)
             // 立即设置的话 forEach 会立马再触发，要延迟一下
             process.nextTick(() =>
-              this._connectionPool.set(key, connectionPoolData)
+              this._tcpConnectionPool.set(key, connectionPoolData)
             )
           }
         })
@@ -137,7 +137,7 @@ export class TunnelServer extends EventEmitter<{
   }
 
   sendMessage(key: string, pack: PackData) {
-    const socket = this._connectionPool.get(key)?.socket
+    const socket = this._tcpConnectionPool.get(key)?.socket
     if (!socket) return
     socket.write(pack)
     return socket

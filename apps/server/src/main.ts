@@ -13,19 +13,21 @@ const tunnelConfig = new TunnelConfig(join(process.cwd(), 'tunnel-config.json'))
 
 const tunnelServerHost = process.env.TUNNEL_SERVER_HOST ?? '127.0.0.1'
 const tunnelServerPort = Number(process.env.TUNNEL_SERVER_PORT ?? 4948)
+
 const tunnelServer = new TunnelServer({
   port: tunnelServerPort,
   tunnelConfig
 })
 
-const httpProxyServer = new HTTPProxyServer({
-  port: Number(process.env.PROXY_SERVER_PORT ?? 80),
-  tunnelConfig
-})
+const httpProxyServer = new HTTPProxyServer(
+  Number(process.env.PROXY_SERVER_PORT ?? 80)
+)
 
-const tunnelSocketAndTcpSignsMap = new Map<net.Socket, string[]>()
+// 隧道 socket 和代理请求标识符的映射
+const tunnelSocketMapTcpSigns = new Map<net.Socket, string[]>()
 
-httpProxyServer.on('connect', (sign, proxyMapWithKey, socket) => {
+httpProxyServer.on('connect', (sign, host) => {
+  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
   if (proxyMapWithKey) {
     // 给隧道的客户端标记上传递给它的 http 请求的标识，关闭时统一关闭
     const tunnelSocket = tunnelServer.sendMessage(
@@ -37,43 +39,50 @@ httpProxyServer.on('connect', (sign, proxyMapWithKey, socket) => {
       })
     )
     if (tunnelSocket) {
-      const signs = tunnelSocketAndTcpSignsMap.get(tunnelSocket)
+      const signs = tunnelSocketMapTcpSigns.get(tunnelSocket)
       if (signs) {
         signs.push(sign)
       } else {
-        tunnelSocketAndTcpSignsMap.set(tunnelSocket, [sign])
+        tunnelSocketMapTcpSigns.set(tunnelSocket, [sign])
       }
     } else {
-      socket.destroy()
+      httpProxyServer.destroy(sign)
     }
+  } else {
+    // 找不到映射直接断开连接
+    httpProxyServer.destroy(sign)
   }
 })
 
-httpProxyServer.on('data', (sign, proxyMapWithKey, chunk) => {
-  if (proxyMapWithKey) {
-    tunnelServer.sendMessage(
-      proxyMapWithKey.key,
-      TunnelPackage.pack(
-        {
-          type: TunnelPackageType.TCPRequestStream,
-          sign
-        },
-        chunk
-      )
-    )
-  }
-})
+httpProxyServer.on('data', (sign, host, chunk) => {
+  if (!host) return
+  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
+  if (!proxyMapWithKey) return
 
-httpProxyServer.on('close', (sign, proxyMapWithKey) => {
-  if (proxyMapWithKey) {
-    tunnelServer.sendMessage(
-      proxyMapWithKey.key,
-      TunnelPackage.pack({
-        type: TunnelPackageType.TCPRequestClose,
+  tunnelServer.sendMessage(
+    proxyMapWithKey.key,
+    TunnelPackage.pack(
+      {
+        type: TunnelPackageType.TCPRequestStream,
         sign
-      })
+      },
+      chunk
     )
-  }
+  )
+})
+
+httpProxyServer.on('close', (sign, host) => {
+  if (!host) return
+  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
+  if (!proxyMapWithKey) return
+
+  tunnelServer.sendMessage(
+    proxyMapWithKey.key,
+    TunnelPackage.pack({
+      type: TunnelPackageType.TCPRequestClose,
+      sign
+    })
+  )
 })
 
 tunnelServer.on('message', unpackData => {
@@ -88,7 +97,7 @@ tunnelServer.on('message', unpackData => {
 })
 
 tunnelServer.on('socketClose', tunnelSocket => {
-  const signs = tunnelSocketAndTcpSignsMap.get(tunnelSocket)
+  const signs = tunnelSocketMapTcpSigns.get(tunnelSocket)
   if (signs) {
     signs.forEach(sign => {
       httpProxyServer.destroy(sign)
