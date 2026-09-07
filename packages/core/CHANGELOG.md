@@ -1,5 +1,11 @@
 # @ying-tunnel/core
 
+## 1.2.0
+
+### Minor Changes
+
+- optimize HTTPProxyServer
+
 ## 1.1.0
 
 ### Minor Changes
