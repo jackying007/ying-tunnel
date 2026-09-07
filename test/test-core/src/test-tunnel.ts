@@ -5,7 +5,7 @@ import {
   TunnelClient,
   TunnelPackage,
   TunnelPackageType
-} from '@ying-tunnel/lib'
+} from '@ying-tunnel/core'
 
 const port = 4948
 

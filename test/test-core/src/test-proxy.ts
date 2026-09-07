@@ -1,5 +1,9 @@
 import { join } from 'node:path'
-import { TCPProxyClient, HTTPProxyServer, TunnelConfig } from '@ying-tunnel/lib'
+import {
+  TCPProxyClient,
+  HTTPProxyServer,
+  TunnelConfig
+} from '@ying-tunnel/core'
 
 const tcpProxyClient = new TCPProxyClient()
 
@@ -12,13 +16,13 @@ proxyServer.on('connect', (sign, connectInfo) => {
   console.debug({ sign, connectInfo })
   if (connectInfo) {
     const host = connectInfo.localHost.split(':')
-    tcpProxyClient.start(host[0], Number(host[1]), sign)
+    tcpProxyClient.createConnection(host[0], Number(host[1]), sign)
   }
 })
 
 proxyServer.on('data', (sign, _, chunk) => {
   console.log(chunk.length)
-  tcpProxyClient.stream(sign, chunk)
+  tcpProxyClient.write(sign, chunk)
 })
 
 proxyServer.on('close', sign => {
@@ -27,7 +31,7 @@ proxyServer.on('close', sign => {
 
 tcpProxyClient.on('data', (sign, chunk) => {
   console.log(chunk.length)
-  proxyServer.stream(sign, chunk)
+  proxyServer.write(sign, chunk)
 })
 
 tcpProxyClient.on('close', sign => {
