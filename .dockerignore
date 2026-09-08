@@ -1,6 +1,1 @@
-node_modules
-.git
-.gitignore
-*.md
-dist
 **/tunnel-config.json

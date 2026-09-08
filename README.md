@@ -68,6 +68,13 @@ pnpm dev:test-server
 
 ## 本地 docker 服务打包与启动
 
+先使用 turbo 生成干净的依赖项文件用于 docker 缓存。
+
+```bash
+rm -rf out
+pnpm turbo-prune
+```
+
 ```bash
 docker build --tag ying-tunnel-server:test --target server-runner .
 ```

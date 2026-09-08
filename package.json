@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=18"
+    "node": ">=24"
   },
   "scripts": {
     "dev:apps": "dotenv -- turbo run dev --filter=./apps/*",
@@ -24,7 +24,8 @@
     "dev:pkgs": "turbo run dev --filter=./packages/*",
     "build:pkgs": "turbo run build --filter=./packages/*",
     "dev:test-server": "turbo run dev --filter=test-server",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "turbo-prune": "turbo prune @ying-tunnel/admin @ying-tunnel/server --docker"
   },
   "packageManager": "pnpm@10.33.4",
   "devDependencies": {
