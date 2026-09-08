@@ -18,7 +18,7 @@ RUN cp -r apps/admin/dist/* apps/server/static/
 # 最后只保留服务端，并清理一切不需要的依赖
 RUN pnpm deploy --filter=server --prod --no-optional --legacy prune-server
 
-FROM base AS server-runner
+FROM base AS server
 EXPOSE $ADMIN_API_PORT
 EXPOSE $TUNNEL_SERVER_PORT
 EXPOSE $PROXY_SERVER_PORT

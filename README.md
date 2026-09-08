@@ -76,7 +76,7 @@ pnpm turbo-prune
 ```
 
 ```bash
-docker build --tag ying-tunnel-server:test --target server-runner .
+docker build --platform linux/amd64 --target server --tag ying-tunnel-server:test .
 ```
 
 ```bash
