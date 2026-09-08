@@ -1,10 +1,12 @@
 import path from 'node:path'
 import { styleText } from 'node:util'
-import fastify from 'fastify'
-import fastifyStatic from '@fastify/static'
-import { randomKey, TunnelConfig, ProxyMap } from '@ying-tunnel/core'
+import { Hono } from 'hono'
+import { z } from 'zod'
+import { zValidator } from '@hono/zod-validator'
+import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
+import { randomKey, TunnelConfig } from '@ying-tunnel/core'
 
-const AdminServerPort = Number(process.env.ADMIN_API_PORT || 5859)
 const AdminPassword = process.env.ADMIN_PASSWORD
 
 const adminSessionMap = new Map<string, Date>()
@@ -35,146 +37,115 @@ export function adminApiBoostrap(
   tunnelServerHost: string,
   tunnelServerPort: number
 ) {
-  const app = fastify()
-
-  app.register(fastifyStatic, {
-    prefix: '/',
-    root: path.join(process.cwd(), 'static')
-  })
+  const app = new Hono()
 
   const protectRoutes = ['/api/tunnel-info', '/api/tunnel']
-  app.addHook('onRequest', (request, reply, done) => {
-    const session = request.headers['session'] as string | undefined
-
-    if (protectRoutes.some(url => request.url.startsWith(url))) {
+  app.use('*', async ({ req, json }, next) => {
+    const path = req.path
+    if (protectRoutes.some(url => path.startsWith(url))) {
+      const session = req.header('session')
       if (!session || !checkSession(session)) {
-        reply.code(401).send({ message: '无授权' })
-        return
+        return json(
+          {
+            message: '无授权'
+          },
+          401
+        )
       }
     }
-    done()
+    await next()
   })
 
-  app.post<{
-    Body: {
-      password: string
-    }
-  }>(
+  app.post(
     '/api/login',
-    {
-      schema: {
-        body: {
-          type: 'object',
-          properties: {
-            password: { type: 'string' }
-          },
-          required: ['password']
-        }
-      }
-    },
-    function (request, reply) {
-      const { password } = request.body
+    zValidator('json', z.object({ password: z.string() })),
+    ({ req, json }) => {
+      const { password } = req.valid('json')
 
       if (password === AdminPassword) {
         const session = randomKey()
         adminSessionMap.set(session, new Date())
-        return { session }
+        return json({ session })
       }
 
-      reply.code(500).send({ message: '密码错误' })
+      return json({ message: '密码错误' }, 500)
     }
   )
 
-  app.get('/api/tunnel-info', function () {
-    return {
+  app.get('/api/tunnel-info', ({ json }) => {
+    return json({
       tunnelServerHost,
       tunnelServerPort,
       tunnelList: tunnelConfig.getTunnelList()
-    }
+    })
   })
 
+  const proxyMapSchema = z.object({
+    serverHost: z.string(),
+    localHost: z.string()
+  })
+
+  const tunnelSchema = z.array(proxyMapSchema).min(1)
+
   // 新增
-  app.post<{
-    Body: ProxyMap[]
-  }>(
-    '/api/tunnel',
-    {
-      schema: {
-        body: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              serverHost: { type: 'string' },
-              localHost: { type: 'string' }
-            },
-            required: ['serverHost', 'localHost']
-          },
-          minItems: 1
-        }
-      }
-    },
-    function (request, reply) {
-      tunnelConfig.set(randomKey(), request.body)
+  app.post('/api/tunnel', zValidator('json', tunnelSchema), ({ req, json }) => {
+    const body = req.valid('json')
+    tunnelConfig.set(randomKey(), body)
+    return json({
+      message: '操作成功'
+    })
+  })
 
-      return {
-        message: '操作成功'
-      }
-    }
-  )
+  const patchSchema = z.object({ key: z.string() })
 
-  // 保存
-  app.post<{
-    Body: ProxyMap[]
-    Params: {
-      key: string
-    }
-  }>(
+  // 修改
+  app.post(
     '/api/tunnel/:key',
-    {
-      schema: {
-        body: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              serverHost: { type: 'string' },
-              localHost: { type: 'string' }
-            },
-            required: ['serverHost', 'localHost']
-          },
-          minItems: 1
-        }
-      }
-    },
-    function (request, reply) {
-      tunnelConfig.set(request.params.key, request.body)
+    zValidator('param', patchSchema),
+    zValidator('json', tunnelSchema),
+    ({ req, json }) => {
+      const { key } = req.valid('param')
+      const body = req.valid('json')
 
-      return {
+      tunnelConfig.set(key, body)
+
+      return json({
         message: '操作成功'
-      }
+      })
     }
   )
 
   // 删除
-  app.delete<{
-    Params: {
-      key: string
+  app.delete(
+    '/api/tunnel/:key',
+    zValidator('param', patchSchema),
+    ({ req, json }) => {
+      const { key } = req.valid('param')
+      tunnelConfig.del(key)
+      return json({
+        message: '删除成功'
+      })
     }
-  }>('/api/tunnel/:key', function (request, reply) {
-    tunnelConfig.del(request.params.key)
+  )
 
-    return {
-      message: '删除成功'
+  app.use(
+    '/*',
+    serveStatic({
+      root: path.join(process.cwd(), 'static')
+    })
+  )
+
+  serve(
+    {
+      fetch: app.fetch,
+      port: Number(process.env.ADMIN_API_PORT || 5859)
+    },
+    info => {
+      console.log(
+        styleText('green', 'AdminServerAPI'),
+        styleText('yellow', 'has started at'),
+        styleText('cyanBright', `http://localhost:${info.port}`)
+      )
     }
-  })
-
-  app.listen({ port: AdminServerPort }, err => {
-    if (err) throw err
-    console.log(
-      styleText('green', 'AdminServerAPI'),
-      styleText('yellow', 'has started at'),
-      styleText('cyanBright', `http://localhost:${AdminServerPort}`)
-    )
-  })
+  )
 }

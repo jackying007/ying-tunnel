@@ -1,43 +1,65 @@
 import path from 'node:path'
-import fastify from 'fastify'
-import fastifyStatic from '@fastify/static'
-import websocket from '@fastify/websocket'
+import { Hono } from 'hono'
+import { serve, upgradeWebSocket } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
+import { WebSocketServer } from 'ws'
 
-const app = fastify()
+const app = new Hono()
 
-// 测试 websocket 的转发
-app.register(websocket)
-app.register(async function (fastify) {
-  fastify.get(
-    '/ws',
-    { websocket: true },
-    (socket /* WebSocket */, req /* FastifyRequest */) => {
-      socket.on('message', message => {
-        // message.toString() === 'hi from client'
-        console.log(message.toString())
-        socket.send('hi from server')
-      })
+app.use(
+  '/*',
+  serveStatic({
+    root: path.join(process.cwd(), 'public')
+  })
+)
+
+app.get(
+  '/ws',
+  upgradeWebSocket(() => ({
+    onOpen(_event, ws) {
+      console.log('WebSocket connected')
+    },
+
+    onMessage(event, ws) {
+      console.log(event.data.toString())
+
+      ws.send('hi from server')
+    },
+
+    onClose() {
+      console.log('WebSocket disconnected')
+    },
+
+    onError(error) {
+      console.error('WebSocket error:', error)
     }
-  )
+  }))
+)
+
+app.get('/api/test', c => {
+  return c.text('哇咔咔')
 })
 
-// 测试文件的转发
-app.register(fastifyStatic, {
-  prefix: '/',
-  root: path.join(process.cwd(), 'public')
+app.post('/api/test', async ({ req, json }) => {
+  const body = await req.json()
+  console.log(body)
+  return json(body)
 })
 
-// 测试正常api的转发
-app.get('/api/test', function (request, reply) {
-  reply.send('哇咔咔')
+const wss = new WebSocketServer({
+  noServer: true
 })
 
-app.post('/api/test', function (request, reply) {
-  console.log(JSON.parse(request.body as string))
-  reply.send(request.body)
-})
-
-app.listen({ port: 6263 }, err => {
-  if (err) throw err
-  console.log('测试服务已启动:', `http://127.0.0.1:6263`)
-})
+serve(
+  {
+    fetch: app.fetch,
+    hostname: '0.0.0.0',
+    port: 6263,
+    websocket: {
+      server: wss
+    }
+  },
+  info => {
+    console.log('测试服务已启动:', `http://127.0.0.1:${info.port}`)
+  }
+)

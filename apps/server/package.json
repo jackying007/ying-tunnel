@@ -7,9 +7,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@fastify/static": "^7.0.4",
-    "@fastify/websocket": "^10.0.1",
+    "@hono/node-server": "^2.1.1",
+    "@hono/zod-validator": "^0.9.1",
     "@ying-tunnel/core": "workspace:*",
-    "fastify": "^4.28.1"
+    "hono": "^4.13.7",
+    "zod": "^4.5.4"
   }
 }
