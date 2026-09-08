@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 import { existsSync, readFileSync } from 'node:fs'
+import { styleText } from 'node:util'
 import { HTTPProxyServer, TCPProxyClient } from '@ying-tunnel/core'
 
 class ProxyMapConfig {
@@ -15,12 +16,25 @@ class ProxyMapConfig {
   get(key: string) {
     return this._proxyMap[key]
   }
+
+  log() {
+    for (const [key, value] of Object.entries(this._proxyMap)) {
+      console.log(
+        styleText('green', `http://${key}`),
+        styleText('yellow', '-->'),
+        styleText('cyanBright', `http://${value}`)
+      )
+    }
+  }
 }
 
 export function createLocalHTTPProxy(configFileName?: string) {
   const proxyMapConfig = new ProxyMapConfig(
     join(process.cwd(), configFileName ?? 'ying-local-proxy.json')
   )
+  setTimeout(() => {
+    proxyMapConfig.log()
+  }, 300)
   const httpProxyServer = new HTTPProxyServer(80)
   const tcpProxyClient = new TCPProxyClient()
 
