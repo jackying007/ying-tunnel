@@ -12,7 +12,7 @@ export function connectTunnel(host: string, port: string, key: string) {
   tunnelClient.on('message', unpackData => {
     switch (unpackData.header.type) {
       case TunnelPackageType.TCPRequestStart:
-        const host = unpackData.header.localHost.split(':')
+        const host = unpackData.header.targetHost.split(':')
         tcpProxyClient.createConnection(
           host[0],
           Number(host[1]),

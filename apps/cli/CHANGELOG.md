@@ -1,5 +1,16 @@
 # @ying-tunnel/cli
 
+## 1.3.0
+
+### Minor Changes
+
+- tunnel config optimization
+
+### Patch Changes
+
+- Updated dependencies
+  - @ying-tunnel/core@1.3.0
+
 ## 1.2.0
 
 ### Minor Changes

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,80 +10,80 @@
     <div id="text"></div>
     <button id="send">发送请求s</button>
     <input id="file" type="file" accept="image/*" :multiple="false" />
-    <img src="/1.png" style="width: 100%; height: 100%" />
+    <img src="/architecture-diagram.png" style="width: 100%; height: 100%" />
   </body>
   <script>
-    fetch("/api/test")
-      .then((res) => res.text())
-      .then((data) => {
-        document.querySelector("#text").innerHTML = data;
-      });
+    fetch('/api/test')
+      .then(res => res.text())
+      .then(data => {
+        document.querySelector('#text').innerHTML = data
+      })
 
-    document.querySelector("#send").addEventListener("click", () => {
-      fetch("/api/test", {
-        method: "POST",
+    document.querySelector('#send').addEventListener('click', () => {
+      fetch('/api/test', {
+        method: 'POST',
         body: JSON.stringify({
           a: 123,
-          n: "asdsadas",
-        }),
+          n: 'asdsadas'
+        })
       })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-        });
-    });
+        .then(res => res.json())
+        .then(data => {
+          console.log(data)
+        })
+    })
 
-    const ajax = new XMLHttpRequest();
+    const ajax = new XMLHttpRequest()
 
     function upload(options) {
-      let { url, method, data, onprogress } = options;
+      let { url, method, data, onprogress } = options
       return new Promise((resolve, reject) => {
-        ajax.open(method, url);
+        ajax.open(method, url)
         if (onprogress) {
-          ajax.upload.onprogress = onprogress;
+          ajax.upload.onprogress = onprogress
         }
         ajax.onreadystatechange = function () {
           if (ajax.readyState == 4) {
             if (ajax.status == 200 || ajax.status == 304) {
-              resolve(JSON.parse(ajax.responseText));
+              resolve(JSON.parse(ajax.responseText))
             } else {
-              reject("error");
+              reject('error')
             }
           }
-        };
-        ajax.send(data);
-      });
+        }
+        ajax.send(data)
+      })
     }
 
-    document.querySelector("#file").addEventListener("change", (e) => {
-      const file = e.target.files[0];
+    document.querySelector('#file').addEventListener('change', e => {
+      const file = e.target.files[0]
 
-      let formData = new FormData();
-      formData.append("file", file);
+      let formData = new FormData()
+      formData.append('file', file)
 
       upload({
-        url: "/api/upload",
-        method: "post",
+        url: '/api/upload',
+        method: 'post',
         data: formData,
-        onprogress: (e) => {
+        onprogress: e => {
           if (e.lengthComputable) {
-            const percent = Math.round((e.loaded * 100) / e.total);
-            console.log(percent);
+            const percent = Math.round((e.loaded * 100) / e.total)
+            console.log(percent)
           }
-        },
-      }).then((res) => {
-        console.log(res);
-      });
-    });
+        }
+      }).then(res => {
+        console.log(res)
+      })
+    })
 
-    const socket = new WebSocket("/ws");
+    const socket = new WebSocket('/ws')
     // Connection opened
-    socket.addEventListener("open", function (event) {
-      socket.send("hi from client");
-    });
+    socket.addEventListener('open', function (event) {
+      socket.send('hi from client')
+    })
     // Listen for messages
-    socket.addEventListener("message", function (event) {
-      console.log("Message from server ", event.data);
-    });
+    socket.addEventListener('message', function (event) {
+      console.log('Message from server ', event.data)
+    })
   </script>
 </html>

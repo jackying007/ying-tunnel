@@ -14,18 +14,14 @@ export class HTTPProxyServer extends EventEmitter<{
   data: [string, string | undefined, Buffer]
   close: [string, string | undefined]
 }> {
-  port: number
-  private _tcpConnectionPool: Map<string, TCPConnectionPoolData>
+  private _tcpConnectionPool: Map<string, TCPConnectionPoolData> = new Map()
 
   constructor(port: number) {
     super()
-    this.port = port
-    this._tcpConnectionPool = new Map()
-
-    this.setup()
+    this.setup(port)
   }
 
-  setup() {
+  setup(port: number) {
     const server = net.createServer(socket => {
       const sign = randomKey(10)
       const poolData: TCPConnectionPoolData = {
@@ -66,11 +62,11 @@ export class HTTPProxyServer extends EventEmitter<{
       })
     })
 
-    server.listen(this.port, () => {
+    server.listen(port, () => {
       console.log(
         styleText('green', 'HTTPProxyServer'),
-        styleText('yellow', 'has started at port:'),
-        styleText('cyanBright', `${this.port}`)
+        styleText('yellow', 'has started at:'),
+        styleText('cyanBright', `tcp://localhost:${port}`)
       )
     })
   }

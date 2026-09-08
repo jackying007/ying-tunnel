@@ -27,40 +27,40 @@ const httpProxyServer = new HTTPProxyServer(
 const tunnelSocketMapTcpSigns = new Map<net.Socket, string[]>()
 
 httpProxyServer.on('connect', (sign, host) => {
-  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
-  if (proxyMapWithKey) {
-    // 给隧道的客户端标记上传递给它的 http 请求的标识，关闭时统一关闭
-    const tunnelSocket = tunnelServer.sendMessage(
-      proxyMapWithKey.key,
-      TunnelPackage.pack({
-        type: TunnelPackageType.TCPRequestStart,
-        sign,
-        localHost: proxyMapWithKey.localHost
-      })
-    )
-    if (tunnelSocket) {
-      const signs = tunnelSocketMapTcpSigns.get(tunnelSocket)
-      if (signs) {
-        signs.push(sign)
-      } else {
-        tunnelSocketMapTcpSigns.set(tunnelSocket, [sign])
-      }
-    } else {
-      httpProxyServer.destroy(sign)
-    }
-  } else {
+  const config = tunnelConfig.findProxyHostConfig(host)
+  if (!config) {
     // 找不到映射直接断开连接
     httpProxyServer.destroy(sign)
+    return
+  }
+  // 给隧道的客户端标记上传递给它的 http 请求的标识，关闭时统一关闭
+  const tunnelSocket = tunnelServer.sendMessage(
+    config.key,
+    TunnelPackage.pack({
+      type: TunnelPackageType.TCPRequestStart,
+      sign,
+      targetHost: config.targetHost
+    })
+  )
+  if (!tunnelSocket) {
+    httpProxyServer.destroy(sign)
+    return
+  }
+  const signs = tunnelSocketMapTcpSigns.get(tunnelSocket)
+  if (signs) {
+    signs.push(sign)
+  } else {
+    tunnelSocketMapTcpSigns.set(tunnelSocket, [sign])
   }
 })
 
 httpProxyServer.on('data', (sign, host, chunk) => {
   if (!host) return
-  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
-  if (!proxyMapWithKey) return
+  const config = tunnelConfig.findProxyHostConfig(host)
+  if (!config) return
 
   tunnelServer.sendMessage(
-    proxyMapWithKey.key,
+    config.key,
     TunnelPackage.pack(
       {
         type: TunnelPackageType.TCPRequestStream,
@@ -73,11 +73,11 @@ httpProxyServer.on('data', (sign, host, chunk) => {
 
 httpProxyServer.on('close', (sign, host) => {
   if (!host) return
-  const proxyMapWithKey = tunnelConfig.findByServerHost(host)
-  if (!proxyMapWithKey) return
+  const config = tunnelConfig.findProxyHostConfig(host)
+  if (!config) return
 
   tunnelServer.sendMessage(
-    proxyMapWithKey.key,
+    config.key,
     TunnelPackage.pack({
       type: TunnelPackageType.TCPRequestClose,
       sign

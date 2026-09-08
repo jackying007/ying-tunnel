@@ -18,7 +18,7 @@ type TunnelPackageHeader =
   | {
       type: TunnelPackageType.TCPRequestStart
       sign: string
-      localHost: string
+      targetHost: string
     }
   | {
       type: TunnelPackageType.TCPRequestClose

@@ -5,11 +5,10 @@ export class TCPProxyClient extends EventEmitter<{
   data: [string, Buffer]
   close: [string]
 }> {
-  private _tcpConnectionPool: Map<string, net.Socket>
+  private _tcpConnectionPool: Map<string, net.Socket> = new Map()
 
   constructor() {
     super()
-    this._tcpConnectionPool = new Map()
   }
 
   createConnection(host: string, port: number, sign: string) {

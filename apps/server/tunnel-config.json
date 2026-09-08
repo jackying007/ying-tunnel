@@ -1,5 +1,5 @@
 {
-  "OxFhMdko9XkAJM37l8RC2": [
-    { "serverHost": "example.localhost", "localHost": "127.0.0.1:6263" }
-  ]
+  "OxFhMdko9XkAJM37l8RC2": {
+    "example.localhost": "127.0.0.1:6263"
+  }
 }

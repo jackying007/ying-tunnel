@@ -14,9 +14,9 @@ const proxyServer = new HTTPProxyServer(80)
 
 proxyServer.on('connect', (sign, serverHost) => {
   console.debug({ sign, serverHost })
-  const config = tunnelConfig.findByServerHost(serverHost)
+  const config = tunnelConfig.findProxyHostConfig(serverHost)
   if (config) {
-    const host = config.localHost.split(':')
+    const host = config.targetHost.split(':')
     tcpProxyClient.createConnection(host[0], Number(host[1]), sign)
   }
 })

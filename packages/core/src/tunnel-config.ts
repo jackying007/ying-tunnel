@@ -1,79 +1,66 @@
-import fs from 'node:fs'
-
-export type ProxyMap = {
-  serverHost: string
-  localHost: string
-}
+import {
+  existsSync,
+  writeFileSync,
+  readFileSync,
+  createWriteStream
+} from 'node:fs'
 
 export class TunnelConfig {
   path: string
-  private _tunnelConfigs: {
-    [key in string]: ProxyMap[]
-  }
+  private _config: Record<string, Record<string, string>>
+  private _proxyHostMap: Map<string, { key: string; targetHost: string }> =
+    new Map()
+
   constructor(path: string) {
     this.path = path
-
-    const fileExists = fs.existsSync(this.path)
+    const fileExists = existsSync(this.path)
     if (!fileExists) {
-      fs.writeFileSync(this.path, '{}')
+      writeFileSync(this.path, '{}')
     }
-    const data = fs.readFileSync(this.path)
-    this._tunnelConfigs = JSON.parse(data.toString())
+    const data = readFileSync(this.path)
+    this._config = JSON.parse(data.toString())
+    this.setup()
+  }
+
+  setup() {
+    const keys = Object.keys(this._config)
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      const proxyMap = this._config[key]
+      const mapKeys = Object.keys(proxyMap)
+      for (let j = 0; j < mapKeys.length; j++) {
+        const mKey = mapKeys[j]
+        this._proxyHostMap.set(mKey, { key, targetHost: proxyMap[mKey] })
+      }
+    }
   }
 
   saveFile() {
-    const ws = fs.createWriteStream(this.path, { flags: 'w+' })
-    ws.end(JSON.stringify(this._tunnelConfigs))
+    const ws = createWriteStream(this.path, { flags: 'w+' })
+    ws.end(JSON.stringify(this._config))
   }
 
   get(key: string) {
-    return this._tunnelConfigs[key]
+    return this._config[key]
   }
 
-  set(key: string, value: ProxyMap[]) {
-    this._tunnelConfigs[key] = value
-
+  set(key: string, value: Record<string, string>) {
+    this._config[key] = value
+    this.setup()
     this.saveFile()
   }
 
   del(key: string) {
-    delete this._tunnelConfigs[key]
-
+    delete this._config[key]
+    this.setup()
     this.saveFile()
   }
 
-  getTunnelList() {
-    const keys = Object.keys(this._tunnelConfigs)
-    const arr = []
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
-      arr.push({
-        key: key,
-        proxyList: this._tunnelConfigs[key]
-      })
-    }
-
-    return arr
+  getConfig() {
+    return this._config
   }
 
-  findByServerHost(serverHost: string) {
-    const keys = Object.keys(this._tunnelConfigs)
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
-      const tunnelArray = this._tunnelConfigs[key]
-
-      for (let j = 0; j < tunnelArray.length; j++) {
-        const tunnel = tunnelArray[j]
-        if (tunnel.serverHost === serverHost) {
-          return {
-            key,
-            serverHost: tunnel.serverHost,
-            localHost: tunnel.localHost
-          }
-        }
-      }
-    }
-
-    return
+  findProxyHostConfig(proxyHost: string) {
+    return this._proxyHostMap.get(proxyHost)
   }
 }

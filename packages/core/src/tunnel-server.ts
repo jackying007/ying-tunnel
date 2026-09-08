@@ -23,23 +23,20 @@ export class TunnelServer extends EventEmitter<{
   message: [UnpackData]
   socketClose: [net.Socket]
 }> {
-  port: number
   tunnelConfig: TunnelConfig
   closeTime: number
 
-  private _tcpConnectionPool: Map<string, ConnectionPoolData>
+  private _tcpConnectionPool: Map<string, ConnectionPoolData> = new Map()
   private _server?: net.Server
 
   constructor({ port, tunnelConfig, closeTime = 5000 }: TunnelServerOptions) {
     super()
-    this.port = port
     this.tunnelConfig = tunnelConfig
     this.closeTime = closeTime
-    this._tcpConnectionPool = new Map()
-    this.setup()
+    this.setup(port)
   }
 
-  setup() {
+  setup(port: number) {
     this._server = net.createServer(socket => {
       console.log(
         styleText('green', 'TunnelServer'),
@@ -90,11 +87,11 @@ export class TunnelServer extends EventEmitter<{
       })
     })
 
-    this._server.listen(this.port, () => {
+    this._server.listen(port, () => {
       console.log(
         styleText('green', 'TunnelServer'),
-        styleText('yellow', 'has started at port:'),
-        styleText('cyanBright', `${this.port}`)
+        styleText('yellow', 'has started at:'),
+        styleText('cyanBright', `tcp://localhost:${port}`)
       )
     })
   }

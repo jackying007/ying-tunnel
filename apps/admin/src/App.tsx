@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Spin,
@@ -13,18 +13,14 @@ import {
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { JsonEditor } from 'json-edit-react'
-import type { ProxyMap } from '@ying-tunnel/core'
 import { useDialogOpen } from './use-dialog-open'
 
-type Tunnel = {
-  key: string
-  proxyList: ProxyMap[]
-}
+type TunnelConfig = Record<string, Record<string, string>>
 
 type TunnelInfo = {
   tunnelServerHost: string
   tunnelServerPort: number
-  tunnelList: Tunnel[]
+  tunnelConfig: TunnelConfig
 }
 
 const SESSION_KEY = 'access_session'
@@ -36,7 +32,7 @@ async function api(
   init?: RequestInit
 ) {
   const headers: HeadersInit = {
-    session: session || ''
+    session: session ?? ''
   }
 
   if (init?.body) {
@@ -67,19 +63,24 @@ async function api(
   return data
 }
 
+type Tunnel = {
+  key: string
+  proxyMap: Record<string, string>
+}
+
 type EditModalProps = ReturnType<typeof useDialogOpen<Tunnel>> & {
   onSuccess: () => void
 }
 
 function EditModal({ open, onClose, formValue, onSuccess }: EditModalProps) {
   const [loading, setLoading] = useState(false)
-  const [data, setData] = useState(formValue?.proxyList)
+  const [data, setData] = useState(formValue?.proxyMap)
 
   useEffect(() => {
     if (formValue) {
-      setData(formValue.proxyList)
+      setData(formValue.proxyMap)
     } else {
-      setData([])
+      setData({})
     }
   }, [formValue])
 
@@ -90,7 +91,6 @@ function EditModal({ open, onClose, formValue, onSuccess }: EditModalProps) {
         method: 'POST',
         body: JSON.stringify(data)
       })
-
       onClose()
       onSuccess()
     } catch {
@@ -115,13 +115,7 @@ function EditModal({ open, onClose, formValue, onSuccess }: EditModalProps) {
           collapse={false}
           rootName=""
           data={data}
-          setData={data => setData(data as ProxyMap[])}
-          onAdd={props => {
-            ;(props.newData as ProxyMap[])[props.name as number] = {
-              serverHost: '',
-              localHost: ''
-            }
-          }}
+          setData={data => setData(data as Record<string, string>)}
         />
       )}
     </Modal>
@@ -174,12 +168,19 @@ function App() {
   }
 
   useEffect(() => {
-    if (hasLogin) {
-      getTunnelInfo()
-    }
+    if (hasLogin) getTunnelInfo()
   }, [hasLogin])
 
   const modalProps = useDialogOpen<Tunnel>()
+
+  const tunnelList = useMemo<Tunnel[]>(() => {
+    if (!tunnelInfo) return []
+    const keys = Object.keys(tunnelInfo.tunnelConfig)
+    return keys.map(key => ({
+      key,
+      proxyMap: tunnelInfo.tunnelConfig[key]
+    }))
+  }, [tunnelInfo])
 
   const columns: ColumnsType<Tunnel> = [
     {
@@ -207,9 +208,8 @@ function App() {
       ellipsis: true,
       dataIndex: 'proxyList',
       render: (_, record) => {
-        return record.proxyList
-          .map(el => `${el.serverHost}-->${el.localHost}`)
-          .join('，')
+        const mKeys = Object.keys(record.proxyMap)
+        return mKeys.map(key => `${key}-->${record.proxyMap[key]}`).join(', ')
       }
     },
     {
@@ -280,7 +280,7 @@ function App() {
           <Table
             rowKey="key"
             columns={columns}
-            dataSource={tunnelInfo?.tunnelList}
+            dataSource={tunnelList}
             pagination={false}
           />
           <EditModal {...modalProps} onSuccess={getTunnelInfo} />

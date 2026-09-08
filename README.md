@@ -36,7 +36,7 @@ ying-tunnel <要连接的服务ip或域名> <要连接的服务端口> <对应�
 
 ## 架构图
 
-![](./test/test-server/public/1.png)
+![](./test/test-server/public/architecture-diagram.png)
 
 ## 开始模式启动
 

@@ -76,20 +76,13 @@ export function adminApiBoostrap(
     return json({
       tunnelServerHost,
       tunnelServerPort,
-      tunnelList: tunnelConfig.getTunnelList()
+      tunnelConfig: tunnelConfig.getConfig()
     })
   })
 
-  const proxyMapSchema = z.object({
-    serverHost: z.string(),
-    localHost: z.string()
-  })
-
-  const tunnelSchema = z.array(proxyMapSchema).min(1)
-
   // 新增
-  app.post('/api/tunnel', zValidator('json', tunnelSchema), ({ req, json }) => {
-    const body = req.valid('json')
+  app.post('/api/tunnel', async ({ req, json }) => {
+    const body = await req.json()
     tunnelConfig.set(randomKey(), body)
     return json({
       message: '操作成功'
@@ -102,13 +95,10 @@ export function adminApiBoostrap(
   app.post(
     '/api/tunnel/:key',
     zValidator('param', patchSchema),
-    zValidator('json', tunnelSchema),
-    ({ req, json }) => {
+    async ({ req, json }) => {
       const { key } = req.valid('param')
-      const body = req.valid('json')
-
+      const body = await req.json()
       tunnelConfig.set(key, body)
-
       return json({
         message: '操作成功'
       })
@@ -138,11 +128,11 @@ export function adminApiBoostrap(
   serve(
     {
       fetch: app.fetch,
-      port: Number(process.env.ADMIN_API_PORT || 5859)
+      port: Number(process.env.ADMIN_API_PORT ?? 5859)
     },
     info => {
       console.log(
-        styleText('green', 'AdminServerAPI'),
+        styleText('green', 'AdminServer'),
         styleText('yellow', 'has started at'),
         styleText('cyanBright', `http://localhost:${info.port}`)
       )
