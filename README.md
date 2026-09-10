@@ -2,7 +2,7 @@
 
 # 简介
 
-这是一个基于 Nodejs 并使用 Typescript 实现的内网穿透服务与连接客户端 CLI，目前是基于 tcp 实现了 http 流量的代理。
+这是一个基于 Nodejs 并使用 Typescript 实现的内网穿透服务与连接客户端 CLI，核心模块包零依赖，基于 tcp 实现了 http 流量的代理。
 
 ## 使用方式
 
