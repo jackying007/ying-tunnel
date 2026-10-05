@@ -2,7 +2,7 @@
   "name": "test-server",
   "private": true,
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/main.ts"
+    "dev": "bun --watch --no-clear-screen src/main.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

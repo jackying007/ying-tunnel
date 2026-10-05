@@ -10,16 +10,20 @@ npm i @ying-tunnel/cli -g
 pnpm i @ying-tunnel/cli -g
 ```
 
+```bash
+bun i @ying-tunnel/cli -g
+```
+
 本地调试
 
 ```bash
-pnpm link . -g
+bun link
 ```
 
-移除
+移除本地
 
 ```bash
-pnpm un @ying-tunnel/cli -g
+bun unlink
 ```
 
 ### 使用示例

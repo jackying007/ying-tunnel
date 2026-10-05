@@ -1,10 +1,10 @@
 {
   "name": "@ying-tunnel/server",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "scripts": {
-    "dev": "tsx watch --clear-screen=false src/main.ts",
-    "build": "tsc",
+    "dev": "bun --watch --no-clear-screen src/main.ts",
+    "compile": "bun build ./src/main.ts --outdir ./dist --target bun --minify",
     "check": "tsc --noEmit"
   },
   "dependencies": {

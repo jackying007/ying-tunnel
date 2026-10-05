@@ -9,3 +9,7 @@ npm i @ying-tunnel/core
 ```bash
 pnpm i @ying-tunnel/core
 ```
+
+```bash
+bun i @ying-tunnel/core
+```

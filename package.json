@@ -1,12 +1,12 @@
 {
   "name": "ying-tunnel",
-  "description": "nodejs 内网穿透工具套装",
+  "description": "nodejs bun 内网穿透工具套装",
   "keywords": [
     "内网穿透",
     "tunnel",
     "typescript",
     "nodejs",
-    "pnpm",
+    "bun",
     "turbo"
   ],
   "author": {
@@ -15,27 +15,26 @@
     "url": "https://jackying007.github.io/"
   },
   "license": "MIT",
-  "engines": {
-    "node": ">=24"
-  },
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "test/*"
+  ],
   "scripts": {
-    "dev:apps": "dotenv -- turbo run dev --filter=./apps/*",
-    "build:apps": "turbo run build --filter=./apps/*",
-    "dev:pkgs": "turbo run dev --filter=./packages/*",
-    "build:pkgs": "turbo run build --filter=./packages/*",
+    "dev:apps": "bun --env-file=.env turbo run dev --filter=\"./apps/*\"",
+    "build:apps": "turbo run build --filter=\"./apps/*\"",
+    "dev:pkgs": "turbo run dev --filter=\"./packages/*\"",
+    "build:pkgs": "turbo run build --filter=\"./packages/*\"",
     "check": "turbo run check",
     "dev:test-server": "turbo run dev --filter=test-server",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "turbo-prune": "turbo prune @ying-tunnel/admin @ying-tunnel/server --docker"
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
-  "packageManager": "pnpm@10.33.4",
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
     "@types/node": "^26.6.4",
     "@types/ws": "^8.5.13",
-    "dotenv-cli": "^7.4.2",
     "prettier": "^3.9.6",
-    "tsx": "^4.23.13",
     "turbo": "^2.11.7",
     "typescript": "^6.0.3"
   }

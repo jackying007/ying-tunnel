@@ -1,5 +1,13 @@
 # @ying-tunnel/cli
 
+## 1.4.3
+
+### Patch Changes
+
+- fix buffer
+- Updated dependencies
+  - @ying-tunnel/core@1.3.1
+
 ## 1.4.0
 
 ### Minor Changes

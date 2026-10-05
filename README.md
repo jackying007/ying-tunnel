@@ -2,7 +2,7 @@
 
 # 简介
 
-这是一个基于 Nodejs 并使用 Typescript 实现的内网穿透服务与连接客户端 CLI，核心模块包零依赖，基于 tcp 实现了 http 流量的代理。
+这是一个使用 Typescript 实现的内网穿透服务与连接客户端 CLI，核心模块包零依赖，基于 tcp 实现了 http 流量的代理。
 
 ## 使用方式
 
@@ -30,7 +30,7 @@ services:
 启动后打开 `ADMIN_API_PORT` 端口的后台管理服务，输入 `ADMIN_PASSWORD` 登录，配置好要转发的线上地址和本地地址，然后按照提示下载终端工具，复制对应的 key 进行连接即可。
 
 ```bash
-pnpm i @ying-tunnel/cli -g
+bun i @ying-tunnel/cli -g
 ying-tunnel <要连接的服务ip或域名> <要连接的服务端口> <对应的key>
 ```
 
@@ -43,36 +43,43 @@ ying-tunnel <要连接的服务ip或域名> <要连接的服务端口> <对应�
 安装依赖
 
 ```bash
-pnpm i
+bun i
 ```
 
 启动核心库的开发模式，把产物编译出来，其他应用需要依赖它们。
 
 ```bash
-pnpm dev:pkgs
+bun dev:pkgs
 ```
 
 启动所有应用
 
 ```bash
-pnpm dev:apps
+bun dev:apps
+```
+
+默认情况下 `@ying-tunnel/server` 需要监听80端口，如果bun没有权限，需要开启权限。
+
+```bash
+sudo setcap 'cap_net_bind_service=+ep' $(which bun)
 ```
 
 启动一个测试的服务
 
 ```bash
-pnpm dev:test-server
+bun dev:test-server
 ```
 
 访问 `example.localhost`，请求将转发到测试的服务，访问成功则代表整个应用启动成功。
 
 ## 本地 docker 服务打包与启动
 
-先使用 turbo 生成干净的依赖项文件用于 docker 缓存。
+```bash
+bun build:apps
+```
 
 ```bash
-rm -rf out
-pnpm turbo-prune
+cp -r apps/admin/dist/* apps/server/static/
 ```
 
 ```bash
@@ -95,12 +102,12 @@ docker run --name ying-tunnel-server -d \
 ## 发布 packages
 
 ```bash
-pnpm build:pkgs
-pnpm build:apps
+bun build:pkgs
+bun build:apps
 ```
 
 ```bash
-pnpm changeset
-pnpm changeset version
-pnpm changeset publish
+bun changeset
+bun changeset version
+bun changeset publish
 ```

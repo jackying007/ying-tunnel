@@ -260,6 +260,14 @@ function App() {
             >
               pnpm i @ying-tunnel/cli -g
             </Typography.Text>
+            <br />
+            <Typography.Text
+              className="text-lg!"
+              code
+              copyable={{ tooltips: false }}
+            >
+              bun i @ying-tunnel/cli -g
+            </Typography.Text>
             <Typography.Title level={3} className="mt-2!">
               二、连接操作
             </Typography.Title>
