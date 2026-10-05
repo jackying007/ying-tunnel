@@ -107,5 +107,12 @@ bun build:apps
 ```bash
 bun changeset
 bun changeset version
-bun changeset publish
+```
+
+不要执行 `bun changeset publish`，在 bun 下将无法解析 `workspace:*`，发布出去无法使用。
+
+需要进入每个需要发布的包，执行命令
+
+```bash
+bun publish
 ```
