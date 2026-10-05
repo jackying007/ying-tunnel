@@ -76,10 +76,8 @@ bun dev:test-server
 
 ```bash
 bun build:apps
-```
-
-```bash
 cp -r apps/admin/dist/* apps/server/static/
+bun compile:server
 ```
 
 ```bash

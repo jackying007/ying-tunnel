@@ -2,13 +2,6 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
   "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", "artifacts/**"]
-    },
-    "lint": {},
-    "check": {},
     "dev": {
       "cache": false,
       "persistent": true,
@@ -20,6 +13,14 @@
         "ADMIN_API_PORT",
         "ADMIN_PASSWORD"
       ]
-    }
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**", "artifacts/**"]
+    },
+    "compile": {},
+    "lint": {},
+    "check": {}
   }
 }

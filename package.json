@@ -26,6 +26,7 @@
     "build:apps": "turbo run build --filter=\"./apps/*\"",
     "dev:pkgs": "turbo run dev --filter=\"./packages/*\"",
     "build:pkgs": "turbo run build --filter=\"./packages/*\"",
+    "compile:server": "turbo run compile --filter=@ying-tunnel/server",
     "check": "turbo run check",
     "dev:test-server": "turbo run dev --filter=test-server",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
