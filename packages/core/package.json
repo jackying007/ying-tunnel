@@ -27,6 +27,7 @@
   },
   "scripts": {
     "dev": "tsc -b -w --preserveWatchOutput",
-    "build": "tsc"
+    "build": "tsc",
+    "check": "tsc --noEmit"
   }
 }

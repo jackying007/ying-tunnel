@@ -51,7 +51,7 @@ export class HTTPProxyServer extends EventEmitter<{
             break
           }
         }
-        this.emit('data', sign, poolData.host, chunk)
+        this.emit('data', sign, poolData.host, Buffer.from(chunk))
       })
       socket.on('close', () => {
         this._tcpConnectionPool.delete(sign)

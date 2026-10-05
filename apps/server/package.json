@@ -4,7 +4,8 @@
   "version": "1.2.0",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/main.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.1",

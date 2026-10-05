@@ -17,7 +17,7 @@ export class TCPProxyClient extends EventEmitter<{
     this._tcpConnectionPool.set(sign, socket)
 
     socket.on('data', chunk => {
-      this.emit('data', sign, chunk)
+      this.emit('data', sign, Buffer.from(chunk))
     })
 
     socket.on('close', () => {

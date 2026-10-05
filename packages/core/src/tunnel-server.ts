@@ -58,18 +58,19 @@ export class TunnelServer extends EventEmitter<{
       )
 
       socket.on('data', chunk => {
+        let buffer = Buffer.from(chunk)
         if (connectionPoolData.overageBuffer) {
-          chunk = Buffer.concat([connectionPoolData.overageBuffer, chunk])
+          buffer = Buffer.concat([connectionPoolData.overageBuffer, buffer])
         }
-        let unpackData = TunnelPackage.unpack(chunk)
+        let unpackData = TunnelPackage.unpack(buffer)
         while (unpackData && unpackData.completed) {
           this.handleMessage(unpackData, socket)
           // 把剩下的数据切割出来并再次解包
-          chunk = chunk.subarray(unpackData.fullLength)
-          unpackData = TunnelPackage.unpack(chunk)
+          buffer = buffer.subarray(unpackData.fullLength)
+          unpackData = TunnelPackage.unpack(buffer)
         }
         // 如果 unpackData 不完整，把剩下数据保存下次处理
-        connectionPoolData.overageBuffer = chunk
+        connectionPoolData.overageBuffer = buffer
       })
 
       socket.on('close', () => {
